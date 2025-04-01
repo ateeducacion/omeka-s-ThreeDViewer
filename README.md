@@ -1,14 +1,14 @@
 # ThreeDViewer (3D) Module for Omeka S
 
-This module allows administrators to set disk quota limits for sites in Omeka S. It prevents users from uploading files that would exceed the quota set for a site.
+This module allows users to view and interact with 3D models (STL and GLB files) directly within Omeka S.
 
 ## Features
 
-- Set a maximum storage limit (quota) per site
-- Track current storage usage of each site
-- Prevent uploads that would exceed the site's quota
-- Display quota information in the site admin panel
-- Provide a dedicated section for managing quotas
+- View 3D models (STL and GLB formats) directly in the browser
+- Interactive controls for rotating, zooming, and panning 3D models
+- Customizable display options including background color
+- Optional auto-rotation for better visualization
+- Grid display option for better spatial reference
 
 ## Installation
 
@@ -43,16 +43,18 @@ See general end user documentation for [Installing a module](http://omeka.org/s/
 
 ## Usage
 
-1. Once installed, navigate to any site's admin panel
-2. Click on the "Quota" tab in the left sidebar
-3. Set the desired quota size in megabytes (MB)
-4. To set unlimited quota, enter 0
-
-The module will automatically track usage and prevent uploads that would exceed the quota.
+1. Upload STL or GLB files to your Omeka S items as you would any other media file
+2. When viewing an item with a 3D model, the model will automatically be displayed in an interactive viewer
+3. Use your mouse to:
+   - Left-click and drag to rotate the model
+   - Right-click and drag to pan
+   - Scroll to zoom in and out
+4. The module settings allow administrators to customize the default display options
 
 ## Requirements
 
-- Omeka S 4.x or 
+- Omeka S 4.x or later
+- Modern browser with WebGL support (Chrome, Firefox, Safari, Edge)
 
 ## License
 
