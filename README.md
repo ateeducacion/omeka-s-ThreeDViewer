@@ -16,9 +16,8 @@ This module allows users to view and interact with 3D models (STL and GLB files)
 
 1. Download the latest release from the GitHub repository
 2. Extract the zip file to your Omeka S `modules` directory
-3. Rename the directory to `3DViewer` (if needed)
-4. Log in to the Omeka S admin panel and navigate to Modules
-5. Click "Install" next to 3DViewer
+3. Log in to the Omeka S admin panel and navigate to Modules
+5. Click "Install" next to Three3DViewer
 
 ### Using Docker
 
@@ -35,7 +34,7 @@ make up
 4. Wait for the containers to start (this may take a minute)
 5. Access Omeka S at http://localhost:8080
 6. Finish the installation and login as admin user
-7. Navigate to Modules and install the 3DViewer module
+7. Navigate to Modules and install the Three3DViewer module
 
 ## Installation
 
