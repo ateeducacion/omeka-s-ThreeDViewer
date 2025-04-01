@@ -1,0 +1,67 @@
+{
+    "name": "ateeducacion/omeka-s-threedviewer",
+    "description": "Embeds 3D models (GLB, etc.) in Omeka S collections using either model-viewer.js or three.js",
+    "type": "omeka-s-module",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Área de Tecnología Educativa",
+            "email": "ate.educacion@gobiernodecanarias.org"
+        }
+    ],
+    "homepage": "https://github.com/ateeducacion/omeka-s-ThreeDViewer",
+    "support": {
+        "issues": "https://github.com/ateeducacion/omeka-s-ThreeDViewer/issues"
+    },
+    "keywords": [
+        "Omeka S",
+        "module",
+        "3D",
+        "three.js",
+        "model-viewer"
+    ],
+    "require": {
+        "php": ">=7.4"
+    },
+    "config": {
+        "platform": {
+            "php": "7.4"
+        },
+        "allow-plugins": {
+            "omeka/composer-addon-installer": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.12",
+        "phpunit/phpunit": "^9.6",
+        "zerocrates/extract-tagged-strings": "dev-master",
+        "biblibre/omeka-s-test-helper": "dev-master",
+         "omeka/omeka-s": "dev-master",
+         "omeka-s-themes/default": "dev-develop"
+    },
+       "autoload": {
+        "psr-4": {
+            "ThreeDViewer\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Viewer3DTest\\": "test/"
+        }
+    },
+    "repositories": [
+        {
+        "type": "vcs",
+        "url": "https://github.com/zerocrates/extract-tagged-strings.git"
+        },
+            {
+        "type": "vcs",
+        "url": "https://github.com/omeka/omeka-s"
+    },{
+        "type": "vcs",
+        "url": "https://github.com/omeka-s-themes/default"
+    }
+    ]
+}

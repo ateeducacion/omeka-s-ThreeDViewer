@@ -1,0 +1,80 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: ThreeDViewer\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-04-01 19:47+0100\n"
+"PO-Revision-Date: 2023-11-15 12:00+0000\n"
+"Last-Translator: Área de Tecnología Educativa <ate@gobiernodecanarias.org>\n"
+"Language-Team: Spanish\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: Module.php:207
+msgid ""
+"IMPORTANT: To use 3D models, you need to add the following to your Omeka "
+"settings:\n"
+"            • File extensions: stl, glb, gltf\n"
+"            • MIME types: model/stl, model/gltf+json, model/gltf-binary\n"
+"            \n"
+"            Go to Settings > Security > File validation to add these."
+msgstr ""
+"IMPORTANTE: Para usar modelos 3D, debe agregar lo siguiente a la configuración de Omeka:\n"
+"            • Extensiones de archivo: stl, glb, gltf\n"
+"            • Tipos MIME: model/stl, model/gltf+json, model/gltf-binary\n"
+"            \n"
+"            Vaya a Configuración > Seguridad > Validación de archivos para agregarlos."
+
+#: src/Form/ConfigForm.php:28
+msgid "Viewer Height (px)"
+msgstr "Altura del visor (px)"
+
+#: src/Form/ConfigForm.php:29
+msgid "Default height for the 3D viewer in pixels."
+msgstr "Altura predeterminada del visor 3D en píxeles."
+
+#: src/Form/ConfigForm.php:43
+msgid "Auto-rotate models"
+msgstr "Rotar modelos automáticamente"
+
+#: src/Form/ConfigForm.php:44
+msgid "Enable auto-rotation for 3D models."
+msgstr "Habilitar rotación automática para modelos 3D."
+
+#: src/Form/ConfigForm.php:56
+msgid "Background Color"
+msgstr "Color de fondo"
+
+#: src/Form/ConfigForm.php:57
+msgid "Choose the background color for 3D viewers."
+msgstr "Elija el color de fondo para los visores 3D."
+
+#: src/Form/ConfigForm.php:69
+msgid "Show Grid"
+msgstr "Mostrar rejilla"
+
+#: src/Form/ConfigForm.php:70
+msgid "Display a green grid to help with size perception."
+msgstr "Mostrar una rejilla verde para ayudar con la percepción del tamaño."
+
+#~ msgid "Display a grid below the 3D model."
+#~ msgstr "Mostrar una rejilla debajo del modelo 3D."
+
+#~ msgid ""
+#~ "IMPORTANT: To use 3D models, you need to add the following to your Omeka "
+#~ "settings:"
+#~ msgstr ""
+#~ "IMPORTANTE: Para usar modelos 3D, debe agregar lo siguiente a la "
+#~ "configuración de Omeka:"
+
+#~ msgid "• File extensions: stl, glb, gltf"
+#~ msgstr "• Extensiones de archivo: stl, glb, gltf"
+
+#~ msgid "• MIME types: model/stl, model/gltf+json, model/gltf-binary"
+#~ msgstr "• Tipos MIME: model/stl, model/gltf+json, model/gltf-binary"
+
+#~ msgid "Go to Settings > Security > File validation to add these."
+#~ msgstr ""
+#~ "Vaya a Configuración > Seguridad > Validación de archivos para agregarlos."
