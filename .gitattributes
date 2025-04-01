@@ -7,7 +7,7 @@
 /.php-cs-fixer.dist.php  export-ignore
 /language/*.po           export-ignore
 /language/*.pot          export-ignore
-/tests/                  export-ignore
+/test/                   export-ignore
 /vendor/                 export-ignore
 composer.lock            export-ignore
 docker-compose.yml       export-ignore
