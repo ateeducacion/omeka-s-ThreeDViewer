@@ -21,4 +21,5 @@ class ConfigFormTest extends TestCase
         $this->assertInstanceOf(ConfigForm::class, $this->form);
         $this->assertInstanceOf(Form::class, $this->form);
     }
+    
 }
