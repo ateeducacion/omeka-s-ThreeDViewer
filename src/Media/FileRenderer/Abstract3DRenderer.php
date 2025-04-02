@@ -60,30 +60,28 @@ abstract class Abstract3DRenderer implements RendererInterface
                 z-index: 100;
                 pointer-events: none;
             }
+            .grid-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-image: 
+                    linear-gradient(to right, rgba(0, 255, 0, 0.2) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(0, 255, 0, 0.2) 1px, transparent 1px);
+                background-size: 20px 20px;
+                pointer-events: none;
+                z-index: 1;
+            }
         ');
 
+        $infoText = '<div class="model-info">' . $view->translate($title)
+                  . ' - ' . $view->translate('Use mouse to rotate, zoom and pan') . '</div>';
+
         if ($showGrid) {
-            $view->headStyle()->appendStyle('
-                .grid-overlay {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background-image: 
-                        linear-gradient(to right, rgba(0, 255, 0, 0.2) 1px, transparent 1px),
-                        linear-gradient(to bottom, rgba(0, 255, 0, 0.2) 1px, transparent 1px);
-                    background-size: 20px 20px;
-                    pointer-events: none;
-                    z-index: 1;
-                }
-            ');
-            return '<div class="model-info">' . $view->translate($title)
-                 . ' - ' . $view->translate('Use mouse to rotate, zoom and pan') . '</div>'
-                 . '<div class="grid-overlay"></div>';
+            $infoText .= '<div class="grid-overlay"></div>';
         }
 
-        return '<div class="model-info">' . $view->translate($title)
-             . ' - ' . $view->translate('Use mouse to rotate, zoom and pan') . '</div>';
+        return $infoText;
     }
 }

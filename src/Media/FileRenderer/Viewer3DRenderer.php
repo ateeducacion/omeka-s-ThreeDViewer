@@ -84,15 +84,7 @@ class Viewer3DRenderer implements RendererInterface
     {
         $filename = $media->filename();
         $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-
         $is3D = in_array($extension, ['stl', 'glb', 'gltf'], true);
-
-        // Check by source filename if provided
-        $source = $media->source();
-        if (!$is3D && $source) {
-            $sourceExtension = strtolower(pathinfo($source, PATHINFO_EXTENSION));
-            $is3D = in_array($sourceExtension, ['stl', 'glb', 'gltf'], true);
-        }
 
         return $is3D;
     }
