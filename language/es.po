@@ -14,16 +14,16 @@ msgstr ""
 
 #: src/Media/FileRenderer/GlbRenderer.php:92
 msgid "GLB Viewer"
-msgstr ""
+msgstr "Visor GLB"
 
 #: src/Media/FileRenderer/GlbRenderer.php:94
 #: src/Media/FileRenderer/StlRenderer.php:128
 msgid "Use mouse to rotate, zoom and pan"
-msgstr ""
+msgstr "Usa el ratón para rotar, hacer zoom y desplazar"
 
 #: src/Media/FileRenderer/StlRenderer.php:126
 msgid "STL Viewer"
-msgstr ""
+msgstr "Visor STL"
 
 #: src/Form/ConfigForm.php:21
 msgid "Viewer Height (px)"
