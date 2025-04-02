@@ -18,8 +18,6 @@ use ThreeDViewer\Form\ConfigForm;
  */
 class Module extends AbstractModule
 {
-    const VERSION = '1.0.0';
-
     /**
      * Retrieve the configuration array.
      *
@@ -50,41 +48,25 @@ class Module extends AbstractModule
      *
      * @param ServiceLocatorInterface $serviceLocator
      */
-    protected function updateWhitelist(ServiceLocatorInterface $serviceLocator): void
+    protected function updateWhitelist(): void
     {
-        $settings = $serviceLocator->get('Omeka\Settings');
-        
-        // Get current media types
-        $mediaTypes = $settings->get('media_types', []);
-        
-        // Add 3D model MIME types
-        $newMimeTypes = [
+        $settings = $this->getServiceLocator()->get('Omeka\Settings');
+
+        $whitelist = $settings->get('media_type_whitelist', []);
+        $whitelist = array_values(array_unique(array_merge(array_values($whitelist), [
             'model/stl',
             'model/gltf+json',
-            'model/gltf-binary'
-        ];
-        
-        foreach ($newMimeTypes as $mimeType) {
-            if (!in_array($mimeType, $mediaTypes)) {
-                $mediaTypes[] = $mimeType;
-            }
-        }
-        
-        $settings->set('media_types', $mediaTypes);
-        
-        // Get current file extensions
-        $extensions = $settings->get('file_extensions', []);
-        
-        // Add 3D model extensions
-        $newExtensions = ['stl', 'glb', 'gltf'];
-        
-        foreach ($newExtensions as $extension) {
-            if (!in_array($extension, $extensions)) {
-                $extensions[] = $extension;
-            }
-        }
-        
-        $settings->set('file_extensions', $extensions);
+            'model/gltf-binary',
+        ])));
+        $settings->set('media_type_whitelist', $whitelist);
+
+        $whitelist = $settings->get('extension_whitelist', []);
+        $whitelist = array_values(array_unique(array_merge(array_values($whitelist), [
+            'stl',
+            'glb',
+            'gltf',
+        ])));
+        $settings->set('extension_whitelist', $whitelist);
     }
 
     /**
@@ -132,39 +114,9 @@ class Module extends AbstractModule
             }
         );
         
-        // Add a listener for the renderer.pre_render event
-        $sharedEventManager->attach(
-            'Omeka\Media\Renderer\Manager',
-            'renderer.pre_render',
-            function ($event) {
-                $renderer = $event->getTarget();
-                $media = $event->getParam('media');
-                
-                if (!$media) {
-                    return;
-                }
-                
-                $filename = $media->filename();
-                $source = $media->source();
-                $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-                                
-                // Check if this is a 3D model file by extension or source
-                if ($extension === 'stl' ||
-                    stripos($filename, '.stl') !== false ||
-                    ($source && stripos($source, '.stl') !== false)) {
-                    error_log("Detected STL file in pre-render: " . $filename);
-                    // We'll handle this in the handleMediaRender method
-                } elseif ($extension === 'glb' ||
-                          $extension === 'gltf' ||
-                          stripos($filename, '.glb') !== false ||
-                          stripos($filename, '.gltf') !== false ||
-                          ($source && (stripos($source, '.glb') !== false || stripos($source, '.gltf') !== false))) {
-                    error_log("Detected GLB/GLTF file in pre-render: " . $filename);
-                    // We'll handle this in the handleMediaRender method
-                }
-            }
-        );
-        
+        // Call registerRenderers directly
+        // $this->registerRenderers();
+
         // Register our renderers for media rendering
         $sharedEventManager->attach(
             'Omeka\Api\Representation\MediaRepresentation',
@@ -172,18 +124,34 @@ class Module extends AbstractModule
             [$this, 'handleMediaRender']
         );
         
-        // Also attach to the view.show.after event for items
         $sharedEventManager->attach(
-            'Omeka\Controller\Site\Item',
-            'view.show.after',
-            [$this, 'addScriptsToPage']
+            'Omeka\Api\Representation\MediaRepresentation',
+            'rep.media.render',
+            [$this, 'handleMediaRender']
         );
+
+        $sharedEventManager->attach(
+            '*',
+            'view.render',
+            function ($event) {
+                die("view.render event triggered");
+                error_log("view.render event triggered");
+            }
+        );
+
+
+        // // Also attach to the view.show.after event for items
+        // $sharedEventManager->attach(
+        //     'Omeka\Controller\Site\Item',
+        //     'view.show.after',
+        //     [$this, 'addScriptsToPage']
+        // );
         
-        $sharedEventManager->attach(
-            'Omeka\Controller\Admin\Item',
-            'view.show.after',
-            [$this, 'addScriptsToPage']
-        );
+        // $sharedEventManager->attach(
+        //     'Omeka\Controller\Admin\Item',
+        //     'view.show.after',
+        //     [$this, 'addScriptsToPage']
+        // );
         
         // We don't need to attach events for configuration forms
         // since we now use the getConfigForm and handleConfigForm methods
@@ -201,31 +169,14 @@ class Module extends AbstractModule
         $config = $services->get('Config');
         $settings = $services->get('Omeka\Settings');
         
-        // Add message about file extensions and MIME types
-        $messenger = new Messenger();
-        $messenger->addWarning($renderer->translate(
-            'IMPORTANT: To use 3D models, you need to add the following to your Omeka settings:
-            • File extensions: stl, glb, gltf
-            • MIME types: model/stl, model/gltf+json, model/gltf-binary
-            
-            Go to Settings > Security > File validation to add these.'
-        ));
-        
         $form = new ConfigForm;
         $form->init();
         
         $form->setData([
             'threedviewer_viewer_height' => $settings->get('threedviewer_viewer_height', 500),
-
-            // 'threedviewer_viewer_height' => $settings->get('threedviewer_viewer_height', 500),
-            
             'threedviewer_auto_rotate' => $settings->get('threedviewer_auto_rotate', true) ? '1' : '0',
-            'threedviewer_show_grid' => $settings->get('threedviewer_show_grid', false) ? '1' : '0',
-
-
-            // 'threedviewer_auto_rotate' => $settings->get('threedviewer_auto_rotate', true),
             'threedviewer_background_color' => $settings->get('threedviewer_background_color', '#ffffff'),
-            // 'threedviewer_show_grid' => $settings->get('threedviewer_show_grid', false),
+            'threedviewer_show_grid' => $settings->get('threedviewer_show_grid', false) ? '1' : '0',
         ]);
         
         return $renderer->formCollection($form, false);
@@ -244,74 +195,25 @@ class Module extends AbstractModule
         $config = $controller->params()->fromPost();
         
         $settings->set('threedviewer_viewer_height', $config['threedviewer_viewer_height']);
-        // $settings->set('threedviewer_auto_rotate', isset($config['threedviewer_auto_rotate']));
-        $settings->set('threedviewer_background_color', $config['threedviewer_background_color']);
-        // $settings->set('threedviewer_show_grid', isset($config['threedviewer_show_grid']));
-
         $settings->set('threedviewer_auto_rotate', $config['threedviewer_auto_rotate'] === '1');
+        $settings->set('threedviewer_background_color', $config['threedviewer_background_color']);
         $settings->set('threedviewer_show_grid', $config['threedviewer_show_grid'] === '1');
     }
     
-    /**
-     * Add necessary scripts to the page for 3D rendering
-     *
-     * @param \Laminas\EventManager\Event $event
-     */
-    public function addScriptsToPage($event)
-    {
-        $view = $event->getTarget();
-        $item = $view->item;
-        if (!$item) {
-            return;
-        }
-        
-        // Check if this item has 3D media
-        $has3DMedia = false;
-        foreach ($item->media() as $media) {
-            $mediaType = $media->mediaType();
-            $extension = strtolower(pathinfo($media->filename(), PATHINFO_EXTENSION));
-            
-            // Check by extension first
-            if (in_array($extension, ['stl', 'glb', 'gltf'])) {
-                $has3DMedia = true;
-                break;
-            }
-            
-            // Then check by MIME type
-            if (in_array($mediaType, ['model/stl', 'model/gltf-binary', 'model/gltf+json'])) {
-                $has3DMedia = true;
-                break;
-            }
-            
-            // For STL files, also check for application/octet-stream and text/plain
-            if ($extension === 'stl' && in_array($mediaType, ['application/octet-stream', 'text/plain'])) {
-                $has3DMedia = true;
-                break;
-            }
-        }
-        
-        if ($has3DMedia) {
-            // Add all necessary scripts for both libraries
-            $view->headScript()->appendFile(
-                $view->assetUrl('js/three.min.js', 'ThreeDViewer')
-            );
-            $view->headScript()->appendFile(
-                $view->assetUrl('js/GLTFLoader.js', 'ThreeDViewer')
-            );
-            $view->headScript()->appendFile(
-                $view->assetUrl('js/STLLoader.js', 'ThreeDViewer')
-            );
-            $view->headScript()->appendFile(
-                $view->assetUrl('js/OrbitControls.js', 'ThreeDViewer')
-            );
-            $view->headScript()->appendFile(
-                $view->assetUrl('js/model-viewer.min.js', 'ThreeDViewer'),
-                'module'
-            );
-            
-            error_log("Added 3D viewer scripts to page for item: " . $item->id());
-        }
-    }
+    // /**
+    //  * Add necessary scripts to the page for 3D rendering
+    //  *
+    //  * @param \Laminas\EventManager\Event $event
+    //  */
+    // public function addScriptsToPage($event)
+    // {
+    //     $view = $event->getTarget();
+    //     $item = $view->item;
+    //     if (!$item) {
+    //         return;
+    //     }
+
+    // }
     
     /**
      * Handle media rendering based on media type
@@ -320,6 +222,7 @@ class Module extends AbstractModule
      */
     public function handleMediaRender($event)
     {
+        die("adios");
         $media = $event->getTarget();
         $view = $event->getParam('view');
         $filename = $media->filename();
@@ -391,8 +294,9 @@ class Module extends AbstractModule
      *
      * @param \Laminas\EventManager\Event $event
      */
-    public function registerRenderers($event)
+    public function registerRenderers()
     {
+        // due("hola");
         $services = $this->getServiceLocator();
         
         // Use the correct service name for media renderers in Omeka S

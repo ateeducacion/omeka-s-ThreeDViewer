@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace ThreeDViewer;
 
+use ThreeDViewer\Media\FileRenderer\Viewer3DRenderer;
+
 return [
     'view_manager' => [
         'template_path_stack' => [
@@ -15,32 +17,29 @@ return [
             Form\SiteSettingsFieldset::class => Form\SiteSettingsFieldset::class,
         ],
     ],
-    'media_renderers' => [
+    'file_renderers' => [
+        'invokables' => [
+            'stl_renderer' => Media\FileRenderer\StlRenderer::class,
+            'glb_renderer' => Media\FileRenderer\GlbRenderer::class,
+        ],
         'factories' => [
-            'model/stl' => function () {
-                return new Media\FileRenderer\StlRenderer();
+            'viewer3d_renderer' => function ($services) {
+                $rendererManager = $services->get('Omeka\Media\Renderer\Manager');
+                return new Viewer3DRenderer($rendererManager);
             },
-            'model/gltf-binary' => function () {
-                return new Media\FileRenderer\GlbRenderer();
-            },
-            'model/gltf+json' => function () {
-                return new Media\FileRenderer\GlbRenderer();
-            },
-            'application/octet-stream' => function () {
-                return new Media\FileRenderer\Viewer3DRenderer();
-            },
-            'binary/octet-stream' => function () {
-                return new Media\FileRenderer\Viewer3DRenderer();
-            },
-            'application/x-binary' => function () {
-                return new Media\FileRenderer\Viewer3DRenderer();
-            },
-            'text/plain' => function () {
-                return new Media\FileRenderer\Viewer3DRenderer();
-            },
-            'file' => function () {
-                return new Media\FileRenderer\Viewer3DRenderer();
-            },
+        ],
+        'aliases' => [
+            'model/stl' => 'stl_renderer',
+            'model/gltf-binary' => 'glb_renderer',
+            'model/gltf+json' => 'glb_renderer',
+            'application/octet-stream' => 'viewer3d_renderer',
+            'binary/octet-stream' => 'viewer3d_renderer',
+            'application/x-binary' => 'viewer3d_renderer',
+            // This shuld fallback to the original renderer on no 3d File
+            'text/plain' => 'viewer3d_renderer',
+            'stl' => 'stl_renderer',
+            'glb' => 'glb_renderer',
+            'gltf' => 'glb_renderer',
         ],
     ],
     'translator' => [
@@ -58,11 +57,7 @@ return [
             'threedviewer_default_library' => 'model-viewer',
             'threedviewer_viewer_height' => 500,
             'threedviewer_auto_rotate' => true,
-        ],
-        'site_settings' => [
-            'threedviewer_site_library' => 'global',
-            'threedviewer_site_viewer_height' => null,
-            'threedviewer_site_auto_rotate' => null,
-        ],
+            'threedviewer_show_grid' => false,
+        ]
     ],
 ];

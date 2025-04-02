@@ -123,7 +123,10 @@ class StlRenderer implements RendererInterface
         
         // En tu método render del StlRenderer.php
         // Create the viewer container with data attributes for configuration
-        $html = '<div id="info">' . $view->translate('STL Viewer') . ' - ' . $view->translate('Use mouse to rotate, zoom and pan') . '</div>';
+        $html = '<div id="info">' . $view->translate('STL Viewer')
+                . ' - '
+                . $view->translate('Use mouse to rotate, zoom and pan')
+                . '</div>';
         $html .= '<div id="loading" data-stl-url="'
                  . $view->escapeHtmlAttr($media->originalUrl())
                  . '" data-background-color="' . $view->escapeHtmlAttr($backgroundColor)

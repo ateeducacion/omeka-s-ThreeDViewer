@@ -4,14 +4,7 @@
    */
   let scene, camera, renderer, controls;
 
-  // let stl_path = 'binary_cube.stl';
-  // let stl_path = '/files/original/16cfc19de7ce09582718a79ec007781699771b64.stl';
-
-  // init();
-  // animate();
-
   // Function to initialize scene
-  // Modified to receive URL and options as parameters
   function init(modelUrl, options = {}) {
     // Set default options
     const config = {
@@ -164,14 +157,6 @@ function onWindowResize() {
     controls.update(); // Update controls in each frame
     renderer.render(scene, camera);
   }
-
-  // Esperamos a que se cargue el DOM
-  // document.addEventListener('DOMContentLoaded', () => {
-  //   init();
-  //   // Ahora sí, añadimos el canvas al DOM
-  //   // document.body.appendChild(renderer.domElement);
-  //   animate();
-  // });
 
 document.addEventListener('DOMContentLoaded', () => {
     // Get URL and configuration from data attributes

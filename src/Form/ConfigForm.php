@@ -13,13 +13,6 @@ class ConfigForm extends Form
      */
     public function init(): void
     {
-        // IMPORTANT: For this module to work properly, you must allow the following file extensions
-        // and MIME types in the Omeka S security settings:
-        // - File extensions: stl, glb, gltf
-        // - MIME types: model/stl, model/gltf+json, model/gltf-binary
-        
-        // Module configuration
-        
 
         $this->add([
             'name' => 'threedviewer_viewer_height',
@@ -44,11 +37,10 @@ class ConfigForm extends Form
                 'info' => 'Enable auto-rotation for 3D models.', // @translate
             ],
             'attributes' => [
-                'value' => '0', // Valor por defecto si no está marcado
+                'value' => '0',
             ],
         ]);
 
-        
         $this->add([
             'name' => 'threedviewer_background_color',
             'type' => Element\Color::class,
@@ -70,7 +62,7 @@ class ConfigForm extends Form
                 'info' => 'Display a green grid to help with size perception.', // @translate
             ],
             'attributes' => [
-                'value' => '0', // Valor por defecto si no está marcado
+                'value' => '0',
             ],
         ]);
     }
