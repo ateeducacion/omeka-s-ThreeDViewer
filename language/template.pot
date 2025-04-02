@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-02 07:17+0100\n"
+"POT-Creation-Date: 2025-04-02 08:50+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,17 +17,9 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/Media/FileRenderer/GlbRenderer.php:92
-msgid "GLB Viewer"
-msgstr ""
-
-#: src/Media/FileRenderer/GlbRenderer.php:94
-#: src/Media/FileRenderer/StlRenderer.php:128
+#: src/Media/FileRenderer/Abstract3DRenderer.php:82
+#: src/Media/FileRenderer/Abstract3DRenderer.php:87
 msgid "Use mouse to rotate, zoom and pan"
-msgstr ""
-
-#: src/Media/FileRenderer/StlRenderer.php:126
-msgid "STL Viewer"
 msgstr ""
 
 #: src/Form/ConfigForm.php:21
