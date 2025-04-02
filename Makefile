@@ -107,7 +107,7 @@ generate-pot:
 # Update all .po files from .pot template
 update-po:
 	@echo "Updating translation files..."
-	find language -name "*.po" | while read po; do \
+	@find language -name "*.po" | while read po; do \
 		echo "Updating $$po..."; \
 		msgmerge --update --backup=off "$$po" language/template.pot; \
 	done
@@ -116,7 +116,7 @@ update-po:
 # Check for untranslated strings
 check-untranslated:
 	@echo "Checking untranslated strings..."
-	find language -name "*.po" | while read po; do \
+	@find language -name "*.po" | while read po; do \
 		echo "\n$$po:"; \
 		msgattrib --untranslated "$$po" | if grep -q msgid; then \
 			echo "Warning: Untranslated strings found!"; exit 1; \
@@ -128,7 +128,7 @@ check-untranslated:
 # Compile all .po files in the language directory into .mo
 compile-mo:
 	@echo "Compiling .po files into .mo..."
-	find language -name '*.po' | while read po; do \
+	@find language -name '*.po' | while read po; do \
 		mo=$${po%.po}.mo; \
 		msgfmt "$$po" -o "$$mo"; \
 		echo "Compiled $$po -> $$mo"; \

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-01 19:47+0100\n"
+"POT-Creation-Date: 2025-04-02 07:17+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,56 +17,47 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: Module.php:207
-msgid ""
-"IMPORTANT: To use 3D models, you need to add the following to your Omeka "
-"settings:\n"
-"            • File extensions: stl, glb, gltf\n"
-"            • MIME types: model/stl, model/gltf+json, model/gltf-binary\n"
-"            \n"
-"            Go to Settings > Security > File validation to add these."
+#: src/Media/FileRenderer/GlbRenderer.php:92
+msgid "GLB Viewer"
 msgstr ""
 
-#: src/Form/ConfigForm.php:28
-msgid "Viewer Height (px)"
-msgstr ""
-
-#: src/Form/ConfigForm.php:29
-msgid "Default height for the 3D viewer in pixels."
-msgstr ""
-
-#: src/Form/ConfigForm.php:43
-msgid "Auto-rotate models"
-msgstr ""
-
-#: src/Form/ConfigForm.php:44
-msgid "Enable auto-rotation for 3D models."
-msgstr ""
-
-#: src/Form/ConfigForm.php:56
-msgid "Background Color"
-msgstr ""
-
-#: src/Form/ConfigForm.php:57
-msgid "Choose the background color for 3D viewers."
-msgstr ""
-
-#: src/Form/ConfigForm.php:69
-msgid "Show Grid"
-msgstr ""
-
-#: src/Form/ConfigForm.php:70
-msgid "Display a green grid to help with size perception."
-msgstr ""
-
-#: src/Media/FileRenderer/StlRenderer.php:163 src/Media/FileRenderer/GlbRenderer.php:85
+#: src/Media/FileRenderer/GlbRenderer.php:94
+#: src/Media/FileRenderer/StlRenderer.php:128
 msgid "Use mouse to rotate, zoom and pan"
 msgstr ""
 
-#: src/Media/FileRenderer/StlRenderer.php:163
+#: src/Media/FileRenderer/StlRenderer.php:126
 msgid "STL Viewer"
 msgstr ""
 
-#: src/Media/FileRenderer/GlbRenderer.php:85
-msgid "GLB Viewer"
+#: src/Form/ConfigForm.php:21
+msgid "Viewer Height (px)"
+msgstr ""
+
+#: src/Form/ConfigForm.php:22
+msgid "Default height for the 3D viewer in pixels."
+msgstr ""
+
+#: src/Form/ConfigForm.php:36
+msgid "Auto-rotate models"
+msgstr ""
+
+#: src/Form/ConfigForm.php:37
+msgid "Enable auto-rotation for 3D models."
+msgstr ""
+
+#: src/Form/ConfigForm.php:48
+msgid "Background Color"
+msgstr ""
+
+#: src/Form/ConfigForm.php:49
+msgid "Choose the background color for 3D viewers."
+msgstr ""
+
+#: src/Form/ConfigForm.php:61
+msgid "Show Grid"
+msgstr ""
+
+#: src/Form/ConfigForm.php:62
+msgid "Display a green grid to help with size perception."
 msgstr ""
