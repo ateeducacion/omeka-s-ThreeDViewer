@@ -58,3 +58,15 @@ msgstr ""
 #: src/Form/ConfigForm.php:70
 msgid "Display a green grid to help with size perception."
 msgstr ""
+
+#: src/Media/FileRenderer/StlRenderer.php:163 src/Media/FileRenderer/GlbRenderer.php:85
+msgid "Use mouse to rotate, zoom and pan"
+msgstr ""
+
+#: src/Media/FileRenderer/StlRenderer.php:163
+msgid "STL Viewer"
+msgstr ""
+
+#: src/Media/FileRenderer/GlbRenderer.php:85
+msgid "GLB Viewer"
+msgstr ""

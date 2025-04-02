@@ -88,7 +88,7 @@ class GlbRenderer implements RendererInterface
         
         // Create the model-viewer element
         $html = '<div style="position: relative; width: 100%; height: ' . $height . 'px;">';
-        $html .= '<div class="model-info">GLB Viewer - Use mouse to rotate, zoom and pan</div>';
+        $html .= '<div class="model-info">' . $view->translate('GLB Viewer') . ' - ' . $view->translate('Use mouse to rotate, zoom and pan') . '</div>';
         
         // Add grid if enabled
         if ($showGrid) {
