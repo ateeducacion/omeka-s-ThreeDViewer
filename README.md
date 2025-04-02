@@ -40,6 +40,15 @@ make up
 
 See general end user documentation for [Installing a module](http://omeka.org/s/docs/user-manual/modules/#installing-modules)
 
+### Important Security Settings
+
+For this module to work properly, you must allow the following file extensions and MIME types in the Omeka S security settings:
+
+- File extensions: stl, glb, gltf
+- MIME types: model/stl, model/gltf+json, model/gltf-binary
+
+You can configure these in the Omeka S admin panel under Settings > Security.
+
 ## Usage
 
 1. Upload STL or GLB files to your Omeka S items as you would any other media file
