@@ -126,5 +126,4 @@ class Module extends AbstractModule
         $settings->set('threedviewer_background_color', $config['threedviewer_background_color']);
         $settings->set('threedviewer_show_grid', $config['threedviewer_show_grid'] === '1');
     }
-    
 }

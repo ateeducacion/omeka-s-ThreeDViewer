@@ -27,7 +27,6 @@ class Viewer3DRenderer implements RendererInterface
     public function render(PhpRenderer $view, MediaRepresentation $media, array $options = []): string
     {
         if (!$this->is3DFile($media)) {
-
             // Get URLs correctly using view helpers
             $fileUrl = $media->originalUrl();
             $fileName = pathinfo($fileUrl, PATHINFO_BASENAME);
@@ -41,7 +40,6 @@ class Viewer3DRenderer implements RendererInterface
             $html .= '</a></div>';
             
             return $html;
-
         }
 
         $filename = $media->filename();
