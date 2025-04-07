@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-02 08:50+0100\n"
+"POT-Creation-Date: 2025-04-07 23:02+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,8 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/Media/FileRenderer/Abstract3DRenderer.php:82
-#: src/Media/FileRenderer/Abstract3DRenderer.php:87
+#: src/Media/FileRenderer/Abstract3DRenderer.php:70
 msgid "Use mouse to rotate, zoom and pan"
 msgstr ""
 
@@ -39,17 +38,25 @@ msgid "Enable auto-rotation for 3D models."
 msgstr ""
 
 #: src/Form/ConfigForm.php:48
-msgid "Background Color"
+msgid "Foreground Color"
 msgstr ""
 
 #: src/Form/ConfigForm.php:49
-msgid "Choose the background color for 3D viewers."
+msgid "Choose the foreground color for 3D viewers."
+msgstr ""
+
+#: src/Form/ConfigForm.php:60
+msgid "Background Color"
 msgstr ""
 
 #: src/Form/ConfigForm.php:61
+msgid "Choose the background color for 3D viewers."
+msgstr ""
+
+#: src/Form/ConfigForm.php:72
 msgid "Show Grid"
 msgstr ""
 
-#: src/Form/ConfigForm.php:62
+#: src/Form/ConfigForm.php:73
 msgid "Display a green grid to help with size perception."
 msgstr ""

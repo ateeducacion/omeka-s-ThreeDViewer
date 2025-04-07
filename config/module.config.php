@@ -13,20 +13,33 @@ return [
     ],
     'form_elements' => [
         'invokables' => [
+            Form\ConfigForm::class => Form\ConfigForm::class,
             Form\SettingsFieldset::class => Form\SettingsFieldset::class,
             Form\SiteSettingsFieldset::class => Form\SiteSettingsFieldset::class,
         ],
     ],
+
+    'assets' => [
+        'use_externals' => false,
+        'externals' => [
+            'ThreeDViewer' => [
+                'vendor/model-viewer/model-viewer.min.js' =>
+                    'https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js',
+                'vendor/three/three.min.js' =>
+                    'https://cdn.jsdelivr.net/npm/three@0.120.1/build/three.min.js',
+                'vendor/three/STLLoader.js' =>
+                    'https://cdn.jsdelivr.net/npm/three@0.120.1/examples/js/loaders/STLLoader.js',
+                'vendor/three/OrbitControls.js' =>
+                    'https://cdn.jsdelivr.net/npm/three@0.120.1/examples/js/controls/OrbitControls.js',
+            ],
+        ],
+    ],
+
     'file_renderers' => [
         'invokables' => [
             'stl_renderer' => Media\FileRenderer\StlRenderer::class,
             'glb_renderer' => Media\FileRenderer\GlbRenderer::class,
-        ],
-        'factories' => [
-            'viewer3d_renderer' => function ($services) {
-                $rendererManager = $services->get('Omeka\Media\Renderer\Manager');
-                return new Viewer3DRenderer($rendererManager);
-            },
+            'viewer3d_renderer' => Media\FileRenderer\Viewer3DRenderer::class,
         ],
         'aliases' => [
             'model/stl' => 'stl_renderer',

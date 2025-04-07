@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ThreeDViewer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-02 08:50+0100\n"
+"POT-Creation-Date: 2025-04-07 22:05+0100\n"
 "PO-Revision-Date: 2023-11-15 12:00+0000\n"
 "Last-Translator: Área de Tecnología Educativa <ate@gobiernodecanarias.org>\n"
 "Language-Team: Spanish\n"
@@ -12,8 +12,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/Media/FileRenderer/Abstract3DRenderer.php:82
-#: src/Media/FileRenderer/Abstract3DRenderer.php:87
+#: src/Media/FileRenderer/Abstract3DRenderer.php:70
 msgid "Use mouse to rotate, zoom and pan"
 msgstr "Usa el ratón para rotar, hacer zoom y desplazar"
 
@@ -34,18 +33,28 @@ msgid "Enable auto-rotation for 3D models."
 msgstr "Habilitar rotación automática para modelos 3D."
 
 #: src/Form/ConfigForm.php:48
+#, fuzzy
+msgid "Foreground Color"
+msgstr "Color de objeto"
+
+#: src/Form/ConfigForm.php:49
+#, fuzzy
+msgid "Choose the foreground color for 3D viewers."
+msgstr "Elija el color de objeto para los visores 3D."
+
+#: src/Form/ConfigForm.php:60
 msgid "Background Color"
 msgstr "Color de fondo"
 
-#: src/Form/ConfigForm.php:49
+#: src/Form/ConfigForm.php:61
 msgid "Choose the background color for 3D viewers."
 msgstr "Elija el color de fondo para los visores 3D."
 
-#: src/Form/ConfigForm.php:61
+#: src/Form/ConfigForm.php:72
 msgid "Show Grid"
 msgstr "Mostrar rejilla"
 
-#: src/Form/ConfigForm.php:62
+#: src/Form/ConfigForm.php:73
 msgid "Display a green grid to help with size perception."
 msgstr "Mostrar una rejilla verde para ayudar con la percepción del tamaño."
 

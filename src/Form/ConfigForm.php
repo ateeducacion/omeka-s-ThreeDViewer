@@ -42,6 +42,18 @@ class ConfigForm extends Form
         ]);
 
         $this->add([
+            'name' => 'threedviewer_foreground_color',
+            'type' => Element\Color::class,
+            'options' => [
+                'label' => 'Foreground Color', // @translate
+                'info' => 'Choose the foreground color for 3D viewers.', // @translate
+            ],
+            'attributes' => [
+                'required' => false,
+            ],
+        ]);
+
+        $this->add([
             'name' => 'threedviewer_background_color',
             'type' => Element\Color::class,
             'options' => [
@@ -50,7 +62,6 @@ class ConfigForm extends Form
             ],
             'attributes' => [
                 'required' => false,
-                'value' => '#ffffff',
             ],
         ]);
         

@@ -14,15 +14,18 @@ class StlRenderer extends Abstract3DRenderer implements RendererInterface
     {
         $config = $this->getViewerConfig($view);
 
-        $view->headScript()->appendFile('https://cdn.jsdelivr.net/npm/three@0.120.1/build/three.min.js');
-        $view->headScript()->appendFile('https://cdn.jsdelivr.net/npm/three@0.120.1/examples/js/loaders/STLLoader.js');
-        $view->headScript()->appendFile(
-            'https://cdn.jsdelivr.net/npm/three@0.120.1/examples/js/controls/OrbitControls.js'
-        );
+        $view->headScript()->appendFile($view->assetUrl('vendor/three/three.min.js', 'ThreeDViewer'));
+        $view->headScript()->appendFile($view->assetUrl('vendor/three/STLLoader.js', 'ThreeDViewer'));
+        $view->headScript()->appendFile($view->assetUrl('vendor/three/OrbitControls.js', 'ThreeDViewer'));
         $view->headScript()->appendFile($view->assetUrl('js/stl-viewer.js', 'ThreeDViewer'));
 
         $view->headStyle()->appendStyle('
-            .media-render { position: relative; height: ' . $config['height'] . 'px; width: 100%; overflow: hidden; }
+            .media-render { 
+                position: relative; 
+                height: ' . $config['height'] . 'px; 
+                width: 100%; 
+                overflow: hidden; 
+            }
             #loading {
                 position: absolute;
                 top: 50%; left: 50%;
@@ -37,6 +40,7 @@ class StlRenderer extends Abstract3DRenderer implements RendererInterface
 
         return $infoPanel
              . '<div id="loading" data-stl-url="' . $view->escapeHtmlAttr($media->originalUrl())
+             . '" data-foreground-color="' . $view->escapeHtmlAttr($config['foregroundColor'])
              . '" data-background-color="' . $view->escapeHtmlAttr($config['backgroundColor'])
              . '" data-auto-rotate="' . ($config['autoRotate'] ? 'true' : 'false')
              . '" data-show-grid="' . ($config['showGrid'] ? 'true' : 'false') . '">'

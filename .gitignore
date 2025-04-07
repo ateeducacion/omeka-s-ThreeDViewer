@@ -1,6 +1,6 @@
 .aider*
 .DS_Store
-vendor/
+/vendor/
 *.zip
 # PHPUnit cache files
 test/.phpunit.result.cache

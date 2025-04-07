@@ -14,20 +14,6 @@ use Omeka\Media\Renderer\Manager;
  */
 class Viewer3DRenderer implements RendererInterface
 {
-    /**
-     * @var RendererManager
-     */
-    protected $rendererManager;
-
-    /**
-     * Constructor.
-     *
-     * @param RendererManager $rendererManager
-     */
-    public function __construct(Manager $rendererManager = null)
-    {
-        $this->rendererManager = $rendererManager;
-    }
 
     /**
      * Render the file either as a 3D viewer or delegate to the original renderer.
@@ -41,20 +27,21 @@ class Viewer3DRenderer implements RendererInterface
     public function render(PhpRenderer $view, MediaRepresentation $media, array $options = []): string
     {
         if (!$this->is3DFile($media)) {
-            // Get the default renderer based on the media type.
-            try {
-                $origRenderer = $this->rendererManager->get($media->mediaType());
-                // Pass the $view parameter as the first argument
-                // die();
-                                error_log("por aqui si pasa al cargar un jpg");
 
-                return $origRenderer->render($view, $media, $options);
-            } catch (\Laminas\ServiceManager\Exception\ServiceNotFoundException $e) {
-                // Use commented-out fallback code, but correctly
-                error_log("por aqui no pasa al cargar un jpg");
-                $fallback = new \Omeka\Media\Renderer\Fallback();
-                return $fallback->render($view, $media, $options);
-            }
+            // Get URLs correctly using view helpers
+            $fileUrl = $media->originalUrl();
+            $fileName = pathinfo($fileUrl, PATHINFO_BASENAME);
+            
+            // Use the view helper for the default thumbnail URL
+            $thumbnailUrl = $view->assetUrl('thumbnails/default.png', 'Omeka');
+            
+            $html = '<div class="media-render file">';
+            $html .= '<a href="' . $fileUrl . '" title="' . htmlspecialchars($fileName) . '">';
+            $html .= '<img src="' . $thumbnailUrl . '" alt="">';
+            $html .= '</a></div>';
+            
+            return $html;
+
         }
 
         $filename = $media->filename();
@@ -70,8 +57,6 @@ class Viewer3DRenderer implements RendererInterface
         }
         return $renderer->render($view, $media, $options);
     }
-
-
 
     /**
      * Determine if the media file is a 3D model based on its extension.

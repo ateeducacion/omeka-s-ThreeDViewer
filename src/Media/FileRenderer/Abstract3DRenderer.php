@@ -17,7 +17,8 @@ abstract class Abstract3DRenderer implements RendererInterface
         $default = [
             'height' => 500,
             'autoRotate' => true,
-            'backgroundColor' => '#ffffff',
+            'foregroundColor' => '#0000FF',
+            'backgroundColor' => '#b5b5b5',
             'showGrid' => false,
         ];
 
@@ -25,19 +26,9 @@ abstract class Abstract3DRenderer implements RendererInterface
             $setting = $view->plugin('setting');
             $default['height'] = $setting('threedviewer_viewer_height', $default['height']);
             $default['autoRotate'] = $setting('threedviewer_auto_rotate', $default['autoRotate']);
+            $default['foregroundColor'] = $setting('threedviewer_foreground_color', $default['foregroundColor']);
             $default['backgroundColor'] = $setting('threedviewer_background_color', $default['backgroundColor']);
             $default['showGrid'] = $setting('threedviewer_show_grid', $default['showGrid']);
-
-            if ($view->params()->fromRoute('__SITE__')) {
-                $siteSetting = $view->plugin('siteSetting');
-                $default['height'] = $siteSetting('threedviewer_site_viewer_height', $default['height']);
-                $default['autoRotate'] = $siteSetting('threedviewer_site_auto_rotate', $default['autoRotate']);
-                $default['backgroundColor'] = $siteSetting(
-                    'threedviewer_site_background_color',
-                    $default['backgroundColor']
-                );
-                $default['showGrid'] = $siteSetting('threedviewer_site_show_grid', $default['showGrid']);
-            }
         } catch (\Throwable $e) {
             error_log('Error getting settings: ' . $e->getMessage());
         }

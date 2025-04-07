@@ -15,7 +15,7 @@ class GlbRenderer extends Abstract3DRenderer implements RendererInterface
         $config = $this->getViewerConfig($view);
 
         $view->headScript()->appendFile(
-            'https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js',
+            $view->assetUrl('vendor/model-viewer/model-viewer.min.js', 'ThreeDViewer'),
             'module'
         );
 
