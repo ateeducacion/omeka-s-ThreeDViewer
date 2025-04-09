@@ -16,3 +16,5 @@ phpunit.xml              export-ignore
 README.md                export-ignore
 renovate.json            export-ignore
 test.php                 export-ignore
+.DS_Store                export-ignore
+.aider*                  export-ignore
