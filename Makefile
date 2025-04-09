@@ -81,7 +81,10 @@ package:
 	@echo "Updating version to $(VERSION) in module.ini..."
 	$(SED_INPLACE) 's/^\([[:space:]]*version[[:space:]]*=[[:space:]]*\).*$$/\1"$(VERSION)"/' config/module.ini
 	@echo "Creating ZIP archive: ThreeDViewer-$(VERSION).zip..."
-	composer archive --format=zip --file="ThreeDViewer-$(VERSION)"
+	composer archive --format=zip --file="ThreeDViewer-$(VERSION)-raw"
+	@echo "Repacking into proper structure..."
+	mkdir -p tmpzip/ThreeDViewer && unzip -q ThreeDViewer-$(VERSION)-raw.zip -d tmpzip/ThreeDViewer && \
+	cd tmpzip && zip -qr ../ThreeDViewer-$(VERSION).zip ThreeDViewer && cd .. && rm -rf tmpzip ThreeDViewer-$(VERSION)-raw.zip
 	@echo "Restoring version to 0.0.0 in module.ini..."
 	$(SED_INPLACE) 's/^\([[:space:]]*version[[:space:]]*=[[:space:]]*\).*$$/\1"0.0.0"/' config/module.ini
 
