@@ -38,8 +38,12 @@ class StlRenderer extends Abstract3DRenderer implements RendererInterface
 
         $infoPanel = $this->renderInfoPanel($view, 'STL Viewer', $config['showGrid']);
 
+        $rawUrl = $media->originalUrl();
+        $protocolRelativeUrl = preg_replace('/^https?:/', '', $rawUrl);
+
+
         return $infoPanel
-             . '<div id="loading" data-stl-url="' . $view->escapeHtmlAttr($media->originalUrl())
+             . '<div id="loading" data-stl-url="' . $protocolRelativeUrl
              . '" data-foreground-color="' . $view->escapeHtmlAttr($config['foregroundColor'])
              . '" data-background-color="' . $view->escapeHtmlAttr($config['backgroundColor'])
              . '" data-auto-rotate="' . ($config['autoRotate'] ? 'true' : 'false')

@@ -21,9 +21,12 @@ class GlbRenderer extends Abstract3DRenderer implements RendererInterface
 
         $infoPanel = $this->renderInfoPanel($view, 'GLB Viewer', $config['showGrid']);
 
+        $rawUrl = $media->originalUrl();
+        $protocolRelativeUrl = preg_replace('/^https?:/', '', $rawUrl);
+
         return '<div style="position: relative; width: 100%; height: ' . $config['height'] . 'px;">'
              . $infoPanel
-             . '<model-viewer src="' . $media->originalUrl() . '" '
+             . '<model-viewer src="' . $protocolRelativeUrl . '" '
              . 'alt="' . htmlspecialchars($media->displayTitle()) . '" camera-controls '
              . ($config['autoRotate'] ? 'auto-rotate ' : '')
              . 'style="width: 100%; height: 100%; background-color: ' . $config['backgroundColor'] . ';">'
