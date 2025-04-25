@@ -1,6 +1,6 @@
 # ThreeDViewer (3D) Module for Omeka S
 
-![Screenshot of the 3D Viewer](.github/assets/screenshot.png)
+![Screenshot of the 3D Viewer](https://github.com/ateeducacion/omeka-s-ThreeDViewer/blob/main/.github/assets/screenshot.png)
 
 This module allows users to view and interact with 3D models (STL and GLB files) directly within Omeka S.
 
