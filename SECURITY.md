@@ -7,7 +7,7 @@ Only the latest version of the plugin is supported with security updates. `omeka
 | Version | Supported          |
 | ------- | ------------------ |
 | Latest  | :white_check_mark: |
-| < 2.x   | :x:                |
+| < 1.x   | :x:                |
 
 ## Reporting a Vulnerability
 
