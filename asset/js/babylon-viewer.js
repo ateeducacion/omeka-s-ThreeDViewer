@@ -29,7 +29,7 @@
         const radius = Math.max(radiusSource, 0.1);
         const viewRadius = Math.max(radius * 2.5, radius + 1.5);
         camera.radius = viewRadius;
-        camera.lowerRadiusLimit = Math.max(radius * 0.5, 0.1);
+        camera.lowerRadiusLimit = Math.max(radius * 0.1, 0.01);
         camera.upperRadiusLimit = Math.max(viewRadius * 4, radius * 12);
         camera.minZ = Math.max(radius * 0.01, 0.01);
         camera.maxZ = Math.max(radius * 200, viewRadius * 8);
