@@ -1,6 +1,6 @@
 # ThreeDViewer (3D) Module for Omeka S
 
-![Screenshot of the 3D Viewer](https://github.com/ateeducacion/omeka-s-ThreeDViewer/blob/main/.github/assets/screenshot.png)
+![Screenshot of the 3D Viewer](https://raw.githubusercontent.com/ateeducacion/omeka-s-ThreeDViewer/refs/heads/main/.github/assets/screenshot.png)
 
 This module allows users to view and interact with 3D models (STL and GLB files) directly within Omeka S.
 
@@ -21,22 +21,31 @@ This module allows users to view and interact with 3D models (STL and GLB files)
 3. Log in to the Omeka S admin panel and navigate to Modules
 5. Click "Install" next to Three3DViewer
 
-### Using Docker
+### Local Development with Docker
 
-A Docker Compose file is provided for easy testing:
+This repo ships with a docker-compose that uses the erseco/alpine-omeka-s image for quick local testing.
 
-1. Make sure you have Docker and Docker Compose installed
-2. Clone this repository
-3. From the repository root, run:
+- Start: `make up` (or `make upd` to run detached)
+- Open: http://localhost:8080
+- Shell: `make shell`
 
-```bash
-make up
-```
+On first boot it will:
+- Create an editor user for testing
+- Auto-install the ThreeDViewer module from the mounted source
+- If `data/sample_data.csv` exists, auto-import it via CSVImport
 
-4. Wait for the containers to start (this may take a minute)
-5. Access Omeka S at http://localhost:8080
-6. Finish the installation and login as admin user
-7. Navigate to Modules and install the Three3DViewer module
+Default users:
+
+| Email                 | Role         | Password        |
+| --------------------- | ------------ | --------------- |
+| admin@example.com     | global_admin | PLEASE_CHANGEME |
+| editor@example.com    | editor       | 1234            |
+
+CSV import
+
+- Place your CSV at `data/sample_data.csv` before running `make up`.
+- The compose config mounts `./data` into the container as `/data` and sets `OMEKA_CSV_IMPORT_FILE=/data/sample_data.csv`.
+- The CSVImport module is auto-installed; the image will import the CSV on first boot if the file is present.
 
 ## Installation
 
