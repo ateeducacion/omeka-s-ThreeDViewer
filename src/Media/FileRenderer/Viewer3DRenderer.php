@@ -30,7 +30,7 @@ class Viewer3DRenderer implements RendererInterface
             // Get URLs correctly using view helpers
             $fileUrl = $media->originalUrl();
             $fileName = pathinfo($fileUrl, PATHINFO_BASENAME);
-            
+
             // Use the view helper for the default thumbnail URL
             $thumbnailUrl = $view->assetUrl('thumbnails/default.png', 'Omeka');
             
@@ -46,12 +46,30 @@ class Viewer3DRenderer implements RendererInterface
         $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
         error_log("Processing 3D file: $filename");
 
+        $library = 'model-viewer';
+        try {
+            $settings = $view->plugin('setting');
+            $library = $settings('threedviewer_default_library', $library);
+        } catch (\Throwable $exception) {
+            error_log('Unable to fetch 3D viewer settings: ' . $exception->getMessage());
+        }
+
         if ($extension === 'stl') {
-            error_log("Using STL renderer for: $filename");
-            $renderer = new StlRenderer();
+            if ($library === 'babylon') {
+                error_log("Using Babylon renderer for STL: $filename");
+                $renderer = new BabylonRenderer();
+            } else {
+                error_log("Using STL renderer for: $filename");
+                $renderer = new StlRenderer();
+            }
         } else {
-            error_log("Using GLB renderer for: $filename");
-            $renderer = new GlbRenderer();
+            if ($library === 'babylon') {
+                error_log("Using Babylon renderer for: $filename");
+                $renderer = new BabylonRenderer();
+            } else {
+                error_log("Using GLB renderer for: $filename");
+                $renderer = new GlbRenderer();
+            }
         }
         return $renderer->render($view, $media, $options);
     }

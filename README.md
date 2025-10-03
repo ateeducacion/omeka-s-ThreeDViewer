@@ -11,6 +11,7 @@ This module allows users to view and interact with 3D models (STL and GLB files)
 - Customizable display options including background color
 - Optional auto-rotation for better visualization
 - Grid display option for better spatial reference
+- Optional Babylon.js renderer with configurable cameras, lighting, and WebXR support
 
 ## Installation
 
@@ -33,7 +34,9 @@ See general end user documentation for [Installing a module](http://omeka.org/s/
    - Left-click and drag to rotate the model
    - Right-click and drag to pan
    - Scroll to zoom in and out
-4. The module settings allow administrators to customize the default display options
+4. The module settings allow administrators to customize the default display options, including switching between the built-in
+   `model-viewer.js` integration or the experimental Babylon.js renderer. When Babylon.js is enabled you can choose camera
+   behaviors, lighting presets, an environment ground/skybox, and opt-in WebXR (VR/AR) support for capable browsers.
 
 ## Local Development with Docker
 

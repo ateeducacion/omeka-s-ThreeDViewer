@@ -40,6 +40,7 @@ return [
             'stl_renderer' => Media\FileRenderer\StlRenderer::class,
             'glb_renderer' => Media\FileRenderer\GlbRenderer::class,
             'viewer3d_renderer' => Media\FileRenderer\Viewer3DRenderer::class,
+            'babylon_renderer' => Media\FileRenderer\BabylonRenderer::class,
         ],
         'aliases' => [
             'model/stl' => 'stl_renderer',
@@ -74,6 +75,10 @@ return [
             'threedviewer_viewer_height' => 500,
             'threedviewer_auto_rotate' => true,
             'threedviewer_show_grid' => false,
+            'threedviewer_babylon_camera' => 'arcRotate',
+            'threedviewer_babylon_lighting' => 'hemispheric',
+            'threedviewer_babylon_environment' => 'none',
+            'threedviewer_babylon_enable_xr' => false,
         ]
     ],
 ];
