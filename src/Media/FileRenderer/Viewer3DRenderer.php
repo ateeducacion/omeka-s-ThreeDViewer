@@ -41,10 +41,22 @@ class Viewer3DRenderer implements RendererInterface
             return $html;
         }
 
+        $library = $this->getDefaultLibrary($view);
         $filename = $media->filename();
-        error_log("Rendering 3D file with Babylon.js: $filename");
 
-        $renderer = new BabylonRenderer();
+        if ($library === 'babylon') {
+            error_log("Rendering 3D file with Babylon.js: $filename");
+            $renderer = new BabylonRenderer();
+        } else {
+            $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+            if ($extension === 'stl') {
+                error_log("Rendering 3D file with Three.js STL viewer: $filename");
+                $renderer = new StlRenderer();
+            } else {
+                error_log("Rendering 3D file with model-viewer: $filename");
+                $renderer = new GlbRenderer();
+            }
+        }
 
         return $renderer->render($view, $media, $options);
     }
@@ -63,5 +75,21 @@ class Viewer3DRenderer implements RendererInterface
         $is3D = in_array($extension, ['stl', 'glb', 'gltf'], true);
 
         return $is3D;
+    }
+
+    private function getDefaultLibrary(PhpRenderer $view): string
+    {
+        $default = 'model-viewer';
+
+        try {
+            $setting = $view->plugin('setting');
+            $library = (string) $setting('threedviewer_default_library', $default);
+
+            return in_array($library, ['model-viewer', 'babylon'], true) ? $library : $default;
+        } catch (\Throwable $e) {
+            error_log('Error getting viewer library: ' . $e->getMessage());
+
+            return $default;
+        }
     }
 }

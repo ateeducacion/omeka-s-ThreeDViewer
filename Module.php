@@ -98,6 +98,7 @@ class Module extends AbstractModule
         $form->init();
         
         $form->setData([
+            'threedviewer_default_library' => $settings->get('threedviewer_default_library', 'model-viewer'),
             'threedviewer_viewer_height' => $settings->get('threedviewer_viewer_height', 500),
             'threedviewer_auto_rotate' => $settings->get('threedviewer_auto_rotate', true) ? '1' : '0',
             'threedviewer_foreground_color' => $settings->get('threedviewer_foreground_color', '#0000FF'),
@@ -125,6 +126,7 @@ class Module extends AbstractModule
         
         $config = $controller->params()->fromPost();
         
+        $settings->set('threedviewer_default_library', $config['threedviewer_default_library'] ?? 'model-viewer');
         $settings->set('threedviewer_viewer_height', $config['threedviewer_viewer_height']);
         $settings->set('threedviewer_auto_rotate', isset($config['threedviewer_auto_rotate']) && $config['threedviewer_auto_rotate'] === '1');
         $settings->set('threedviewer_foreground_color', $config['threedviewer_foreground_color']);

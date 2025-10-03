@@ -15,6 +15,19 @@ class ConfigForm extends Form
     {
 
         $this->add([
+            'name' => 'threedviewer_default_library',
+            'type' => Element\Select::class,
+            'options' => [
+                'label' => '3D viewer library', // @translate
+                'info' => 'Select which renderer to use for STL/GLB media.', // @translate
+                'value_options' => [
+                    'model-viewer' => 'Three.js & model-viewer (original)', // @translate
+                    'babylon' => 'Babylon.js (experimental)', // @translate
+                ],
+            ],
+        ]);
+
+        $this->add([
             'name' => 'threedviewer_viewer_height',
             'type' => Element\Number::class,
             'options' => [

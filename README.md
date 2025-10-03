@@ -11,6 +11,7 @@ This module allows users to view and interact with 3D models (STL and GLB files)
 - Customizable display options including background color
 - Optional auto-rotation for better visualization
 - Grid display option for better spatial reference
+- Toggle between the original Three.js/model-viewer pipeline and an experimental Babylon.js renderer
 - Babylon.js renderer with configurable cameras, lighting, and WebXR support
 
 ## Installation
@@ -34,9 +35,9 @@ See general end user documentation for [Installing a module](http://omeka.org/s/
    - Left-click and drag to rotate the model
    - Right-click and drag to pan
    - Scroll to zoom in and out
-4. The module settings allow administrators to customize the default display options powered by Babylon.js, including camera
-   behaviors, lighting presets, an optional environment ground/skybox, opt-in WebXR (VR/AR) support for capable browsers,
-   and an advanced Babylon.js toolbar for fine-tuning scenes on demand.
+4. The module settings allow administrators to choose the default viewing library. Select the legacy Three.js/model-viewer
+   stack for the original experience or opt into Babylon.js for advanced camera behaviour, lighting presets, optional
+   environment ground/skybox, WebXR (VR/AR) support, and an inspector toolbar for fine-tuning scenes on demand.
 
 ## Local Development with Docker
 
