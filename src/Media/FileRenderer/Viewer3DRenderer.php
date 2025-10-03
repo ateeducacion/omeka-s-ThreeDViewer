@@ -6,11 +6,10 @@ use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\Media\FileRenderer\RendererInterface;
 use Laminas\View\Renderer\PhpRenderer;
 
-use Omeka\Media\Renderer\Manager;
-
 /**
- * Renders a 3D model (e.g. GLB) in Omeka S using either model-viewer.js or three.js.
- * This is a generic renderer that delegates to the specific renderers only for 3D files.
+ * Renders 3D models in Omeka S using the Babylon.js renderer for every supported format.
+ * This class keeps backwards compatibility with Omeka's renderer manager by delegating
+ * non-3D media back to the default file render behaviour.
  */
 class Viewer3DRenderer implements RendererInterface
 {
@@ -43,34 +42,10 @@ class Viewer3DRenderer implements RendererInterface
         }
 
         $filename = $media->filename();
-        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-        error_log("Processing 3D file: $filename");
+        error_log("Rendering 3D file with Babylon.js: $filename");
 
-        $library = 'model-viewer';
-        try {
-            $settings = $view->plugin('setting');
-            $library = $settings('threedviewer_default_library', $library);
-        } catch (\Throwable $exception) {
-            error_log('Unable to fetch 3D viewer settings: ' . $exception->getMessage());
-        }
+        $renderer = new BabylonRenderer();
 
-        if ($extension === 'stl') {
-            if ($library === 'babylon') {
-                error_log("Using Babylon renderer for STL: $filename");
-                $renderer = new BabylonRenderer();
-            } else {
-                error_log("Using STL renderer for: $filename");
-                $renderer = new StlRenderer();
-            }
-        } else {
-            if ($library === 'babylon') {
-                error_log("Using Babylon renderer for: $filename");
-                $renderer = new BabylonRenderer();
-            } else {
-                error_log("Using GLB renderer for: $filename");
-                $renderer = new GlbRenderer();
-            }
-        }
         return $renderer->render($view, $media, $options);
     }
 

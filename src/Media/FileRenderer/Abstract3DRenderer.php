@@ -20,7 +20,6 @@ abstract class Abstract3DRenderer implements RendererInterface
             'foregroundColor' => '#0000FF',
             'backgroundColor' => '#b5b5b5',
             'showGrid' => false,
-            'library' => 'model-viewer',
             'babylonCamera' => 'arcRotate',
             'babylonLighting' => 'hemispheric',
             'babylonEnvironment' => 'none',
@@ -34,7 +33,6 @@ abstract class Abstract3DRenderer implements RendererInterface
             $default['foregroundColor'] = $setting('threedviewer_foreground_color', $default['foregroundColor']);
             $default['backgroundColor'] = $setting('threedviewer_background_color', $default['backgroundColor']);
             $default['showGrid'] = $setting('threedviewer_show_grid', $default['showGrid']);
-            $default['library'] = $setting('threedviewer_default_library', $default['library']);
             $default['babylonCamera'] = $setting('threedviewer_babylon_camera', $default['babylonCamera']);
             $default['babylonLighting'] = $setting('threedviewer_babylon_lighting', $default['babylonLighting']);
             $default['babylonEnvironment'] = $setting('threedviewer_babylon_environment', $default['babylonEnvironment']);

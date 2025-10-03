@@ -98,7 +98,6 @@ class Module extends AbstractModule
         $form->init();
         
         $form->setData([
-            'threedviewer_default_library' => $settings->get('threedviewer_default_library', 'model-viewer'),
             'threedviewer_viewer_height' => $settings->get('threedviewer_viewer_height', 500),
             'threedviewer_auto_rotate' => $settings->get('threedviewer_auto_rotate', true) ? '1' : '0',
             'threedviewer_foreground_color' => $settings->get('threedviewer_foreground_color', '#0000FF'),
@@ -130,7 +129,6 @@ class Module extends AbstractModule
         $settings->set('threedviewer_foreground_color', $config['threedviewer_foreground_color']);
         $settings->set('threedviewer_background_color', $config['threedviewer_background_color']);
         $settings->set('threedviewer_show_grid', isset($config['threedviewer_show_grid']) && $config['threedviewer_show_grid'] === '1');
-        $settings->set('threedviewer_default_library', $config['threedviewer_default_library'] ?? 'model-viewer');
         $settings->set('threedviewer_babylon_camera', $config['threedviewer_babylon_camera'] ?? 'arcRotate');
         $settings->set('threedviewer_babylon_lighting', $config['threedviewer_babylon_lighting'] ?? 'hemispheric');
         $settings->set('threedviewer_babylon_environment', $config['threedviewer_babylon_environment'] ?? 'none');
