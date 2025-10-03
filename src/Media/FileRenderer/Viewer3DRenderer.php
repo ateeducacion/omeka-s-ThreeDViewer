@@ -6,11 +6,10 @@ use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\Media\FileRenderer\RendererInterface;
 use Laminas\View\Renderer\PhpRenderer;
 
-use Omeka\Media\Renderer\Manager;
-
 /**
- * Renders a 3D model (e.g. GLB) in Omeka S using either model-viewer.js or three.js.
- * This is a generic renderer that delegates to the specific renderers only for 3D files.
+ * Renders 3D models in Omeka S using the Babylon.js renderer for every supported format.
+ * This class keeps backwards compatibility with Omeka's renderer manager by delegating
+ * non-3D media back to the default file render behaviour.
  */
 class Viewer3DRenderer implements RendererInterface
 {
@@ -30,7 +29,7 @@ class Viewer3DRenderer implements RendererInterface
             // Get URLs correctly using view helpers
             $fileUrl = $media->originalUrl();
             $fileName = pathinfo($fileUrl, PATHINFO_BASENAME);
-            
+
             // Use the view helper for the default thumbnail URL
             $thumbnailUrl = $view->assetUrl('thumbnails/default.png', 'Omeka');
             
@@ -42,17 +41,23 @@ class Viewer3DRenderer implements RendererInterface
             return $html;
         }
 
+        $library = $this->getDefaultLibrary($view);
         $filename = $media->filename();
-        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-        error_log("Processing 3D file: $filename");
 
-        if ($extension === 'stl') {
-            error_log("Using STL renderer for: $filename");
-            $renderer = new StlRenderer();
+        if ($library === 'babylon') {
+            error_log("Rendering 3D file with Babylon.js: $filename");
+            $renderer = new BabylonRenderer();
         } else {
-            error_log("Using GLB renderer for: $filename");
-            $renderer = new GlbRenderer();
+            $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+            if ($extension === 'stl') {
+                error_log("Rendering 3D file with Three.js STL viewer: $filename");
+                $renderer = new StlRenderer();
+            } else {
+                error_log("Rendering 3D file with model-viewer: $filename");
+                $renderer = new GlbRenderer();
+            }
         }
+
         return $renderer->render($view, $media, $options);
     }
 
@@ -70,5 +75,21 @@ class Viewer3DRenderer implements RendererInterface
         $is3D = in_array($extension, ['stl', 'glb', 'gltf'], true);
 
         return $is3D;
+    }
+
+    private function getDefaultLibrary(PhpRenderer $view): string
+    {
+        $default = 'model-viewer';
+
+        try {
+            $setting = $view->plugin('setting');
+            $library = (string) $setting('threedviewer_default_library', $default);
+
+            return in_array($library, ['model-viewer', 'babylon'], true) ? $library : $default;
+        } catch (\Throwable $e) {
+            error_log('Error getting viewer library: ' . $e->getMessage());
+
+            return $default;
+        }
     }
 }

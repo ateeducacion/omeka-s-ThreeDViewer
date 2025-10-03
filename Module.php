@@ -98,11 +98,18 @@ class Module extends AbstractModule
         $form->init();
         
         $form->setData([
+            'threedviewer_default_library' => $settings->get('threedviewer_default_library', 'model-viewer'),
             'threedviewer_viewer_height' => $settings->get('threedviewer_viewer_height', 500),
-            'threedviewer_auto_rotate' => $settings->get('threedviewer_auto_rotate', true),
+            'threedviewer_auto_rotate' => $settings->get('threedviewer_auto_rotate', true) ? '1' : '0',
             'threedviewer_foreground_color' => $settings->get('threedviewer_foreground_color', '#0000FF'),
             'threedviewer_background_color' => $settings->get('threedviewer_background_color', '#b5b5b5'),
-            'threedviewer_show_grid' => $settings->get('threedviewer_show_grid', false),
+            'threedviewer_show_grid' => $settings->get('threedviewer_show_grid', false) ? '1' : '0',
+            'threedviewer_babylon_camera' => $settings->get('threedviewer_babylon_camera', 'arcRotate'),
+            'threedviewer_babylon_lighting' => $settings->get('threedviewer_babylon_lighting', 'hemispheric'),
+            'threedviewer_babylon_environment' => $settings->get('threedviewer_babylon_environment', 'none'),
+            'threedviewer_babylon_enable_xr' => $settings->get('threedviewer_babylon_enable_xr', false) ? '1' : '0',
+            'threedviewer_babylon_show_toolbar' =>
+                $settings->get('threedviewer_babylon_show_toolbar', false) ? '1' : '0',
         ]);
         
         return $renderer->formCollection($form, false);
@@ -120,10 +127,30 @@ class Module extends AbstractModule
         
         $config = $controller->params()->fromPost();
         
+        $settings->set('threedviewer_default_library', $config['threedviewer_default_library'] ?? 'model-viewer');
         $settings->set('threedviewer_viewer_height', $config['threedviewer_viewer_height']);
-        $settings->set('threedviewer_auto_rotate', $config['threedviewer_auto_rotate'] === '1');
+        $settings->set(
+            'threedviewer_auto_rotate',
+            isset($config['threedviewer_auto_rotate'])
+                && $config['threedviewer_auto_rotate'] === '1'
+        );
         $settings->set('threedviewer_foreground_color', $config['threedviewer_foreground_color']);
         $settings->set('threedviewer_background_color', $config['threedviewer_background_color']);
-        $settings->set('threedviewer_show_grid', $config['threedviewer_show_grid'] === '1');
+        $settings->set(
+            'threedviewer_show_grid',
+            isset($config['threedviewer_show_grid'])
+                && $config['threedviewer_show_grid'] === '1'
+        );
+        $settings->set('threedviewer_babylon_camera', $config['threedviewer_babylon_camera'] ?? 'arcRotate');
+        $settings->set('threedviewer_babylon_lighting', $config['threedviewer_babylon_lighting'] ?? 'hemispheric');
+        $settings->set('threedviewer_babylon_environment', $config['threedviewer_babylon_environment'] ?? 'none');
+        $settings->set(
+            'threedviewer_babylon_enable_xr',
+            isset($config['threedviewer_babylon_enable_xr']) && $config['threedviewer_babylon_enable_xr'] === '1'
+        );
+        $settings->set(
+            'threedviewer_babylon_show_toolbar',
+            isset($config['threedviewer_babylon_show_toolbar']) && $config['threedviewer_babylon_show_toolbar'] === '1'
+        );
     }
 }

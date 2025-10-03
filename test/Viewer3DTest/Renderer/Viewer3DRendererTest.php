@@ -49,4 +49,23 @@ class Viewer3DRendererTest extends TestCase
         $this->assertStringContainsString('data-stl-url="//example.org/files/original/mesh.stl"', $html);
         $this->assertStringContainsString('STL Viewer', $html, 'STL info panel present');
     }
+
+    public function testRendersWithBabylonWhenConfigured(): void
+    {
+        $this->view->setSettings([
+            'threedviewer_default_library' => 'babylon',
+        ]);
+
+        $media = new MediaRepresentation(
+            'https://example.org/files/original/model.gltf',
+            'GLTF Sample',
+            'model.gltf'
+        );
+
+        $html = $this->renderer->render($this->view, $media, []);
+
+        $this->assertIsString($html);
+        $this->assertStringContainsString('class="threedviewer-babylon-canvas"', $html);
+        $this->assertStringContainsString('Babylon.js Viewer', $html, 'Babylon info panel present');
+    }
 }

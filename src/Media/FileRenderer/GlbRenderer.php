@@ -23,13 +23,17 @@ class GlbRenderer extends Abstract3DRenderer implements RendererInterface
 
         $rawUrl = $media->originalUrl();
         $protocolRelativeUrl = preg_replace('/^https?:/', '', $rawUrl);
+        $background = $view->escapeHtmlAttr($config['backgroundColor']);
+        $autoRotate = $config['autoRotate'] ? 'auto-rotate ' : '';
+        $modelViewerSrc = $view->escapeHtmlAttr($protocolRelativeUrl);
+        $altText = $view->escapeHtmlAttr($media->displayTitle());
 
-        return '<div style="position: relative; width: 100%; height: ' . $config['height'] . 'px;">'
+        return '<div style="position: relative; width: 100%; height: ' . (int) $config['height'] . 'px;">'
              . $infoPanel
-             . '<model-viewer src="' . $protocolRelativeUrl . '" '
-             . 'alt="' . htmlspecialchars($media->displayTitle()) . '" camera-controls '
-             . ($config['autoRotate'] ? 'auto-rotate ' : '')
-             . 'style="width: 100%; height: 100%; background-color: ' . $config['backgroundColor'] . ';">'
+             . '<model-viewer src="' . $modelViewerSrc . '" '
+             . 'alt="' . $altText . '" camera-controls '
+             . $autoRotate
+             . 'style="width: 100%; height: 100%; background-color: ' . $background . ';">'
              . '</model-viewer>'
              . '</div>';
     }

@@ -20,6 +20,12 @@ abstract class Abstract3DRenderer implements RendererInterface
             'foregroundColor' => '#0000FF',
             'backgroundColor' => '#b5b5b5',
             'showGrid' => false,
+            'defaultLibrary' => 'model-viewer',
+            'babylonCamera' => 'arcRotate',
+            'babylonLighting' => 'hemispheric',
+            'babylonEnvironment' => 'none',
+            'babylonEnableXR' => false,
+            'babylonShowToolbar' => false,
         ];
 
         try {
@@ -29,6 +35,21 @@ abstract class Abstract3DRenderer implements RendererInterface
             $default['foregroundColor'] = $setting('threedviewer_foreground_color', $default['foregroundColor']);
             $default['backgroundColor'] = $setting('threedviewer_background_color', $default['backgroundColor']);
             $default['showGrid'] = $setting('threedviewer_show_grid', $default['showGrid']);
+            $default['defaultLibrary'] = $setting('threedviewer_default_library', $default['defaultLibrary']);
+            $default['babylonCamera'] = $setting('threedviewer_babylon_camera', $default['babylonCamera']);
+            $default['babylonLighting'] = $setting('threedviewer_babylon_lighting', $default['babylonLighting']);
+            $default['babylonEnvironment'] = $setting(
+                'threedviewer_babylon_environment',
+                $default['babylonEnvironment']
+            );
+            $default['babylonEnableXR'] = (bool) $setting(
+                'threedviewer_babylon_enable_xr',
+                $default['babylonEnableXR']
+            );
+            $default['babylonShowToolbar'] = (bool) $setting(
+                'threedviewer_babylon_show_toolbar',
+                $default['babylonShowToolbar']
+            );
         } catch (\Throwable $e) {
             error_log('Error getting settings: ' . $e->getMessage());
         }

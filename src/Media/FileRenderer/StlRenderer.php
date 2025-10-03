@@ -20,11 +20,11 @@ class StlRenderer extends Abstract3DRenderer implements RendererInterface
         $view->headScript()->appendFile($view->assetUrl('js/stl-viewer.js', 'ThreeDViewer'));
 
         $view->headStyle()->appendStyle('
-            .media-render { 
-                position: relative; 
-                height: ' . $config['height'] . 'px; 
-                width: 100%; 
-                overflow: hidden; 
+            .media-render {
+                position: relative;
+                height: ' . (int) $config['height'] . 'px;
+                width: 100%;
+                overflow: hidden;
             }
             #loading {
                 position: absolute;
@@ -40,10 +40,10 @@ class StlRenderer extends Abstract3DRenderer implements RendererInterface
 
         $rawUrl = $media->originalUrl();
         $protocolRelativeUrl = preg_replace('/^https?:/', '', $rawUrl);
-
+        $modelUrl = $view->escapeHtmlAttr($protocolRelativeUrl);
 
         return $infoPanel
-             . '<div id="loading" data-stl-url="' . $protocolRelativeUrl
+             . '<div id="loading" data-stl-url="' . $modelUrl
              . '" data-foreground-color="' . $view->escapeHtmlAttr($config['foregroundColor'])
              . '" data-background-color="' . $view->escapeHtmlAttr($config['backgroundColor'])
              . '" data-auto-rotate="' . ($config['autoRotate'] ? 'true' : 'false')
