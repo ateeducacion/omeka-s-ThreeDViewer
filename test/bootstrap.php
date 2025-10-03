@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Viewer3DTest;
 
 // Composer autoload (if present)
-@require dirname(__DIR__) . '/vendor/autoload.php';
+if (file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
+    require dirname(__DIR__) . '/vendor/autoload.php';
+}
 
 // Lightweight PSR-4 autoloader for tests and stubs
 spl_autoload_register(function (string $class): void {
