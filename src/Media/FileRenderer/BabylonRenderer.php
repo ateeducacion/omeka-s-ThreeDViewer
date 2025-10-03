@@ -78,4 +78,3 @@ class BabylonRenderer extends Abstract3DRenderer implements RendererInterface
             . '</div>';
     }
 }
-

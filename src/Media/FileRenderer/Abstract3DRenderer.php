@@ -38,9 +38,18 @@ abstract class Abstract3DRenderer implements RendererInterface
             $default['defaultLibrary'] = $setting('threedviewer_default_library', $default['defaultLibrary']);
             $default['babylonCamera'] = $setting('threedviewer_babylon_camera', $default['babylonCamera']);
             $default['babylonLighting'] = $setting('threedviewer_babylon_lighting', $default['babylonLighting']);
-            $default['babylonEnvironment'] = $setting('threedviewer_babylon_environment', $default['babylonEnvironment']);
-            $default['babylonEnableXR'] = (bool) $setting('threedviewer_babylon_enable_xr', $default['babylonEnableXR']);
-            $default['babylonShowToolbar'] = (bool) $setting('threedviewer_babylon_show_toolbar', $default['babylonShowToolbar']);
+            $default['babylonEnvironment'] = $setting(
+                'threedviewer_babylon_environment',
+                $default['babylonEnvironment']
+            );
+            $default['babylonEnableXR'] = (bool) $setting(
+                'threedviewer_babylon_enable_xr',
+                $default['babylonEnableXR']
+            );
+            $default['babylonShowToolbar'] = (bool) $setting(
+                'threedviewer_babylon_show_toolbar',
+                $default['babylonShowToolbar']
+            );
         } catch (\Throwable $e) {
             error_log('Error getting settings: ' . $e->getMessage());
         }

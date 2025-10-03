@@ -12,12 +12,14 @@ class MediaRepresentation
     private string $originalUrl;
     private string $displayTitle;
     private string $filename;
+    private int $id;
 
-    public function __construct(string $originalUrl, string $displayTitle, string $filename)
+    public function __construct(string $originalUrl, string $displayTitle, string $filename, int $id = 1)
     {
         $this->originalUrl = $originalUrl;
         $this->displayTitle = $displayTitle;
         $this->filename = $filename;
+        $this->id = $id;
     }
 
     public function originalUrl(): string
@@ -33,5 +35,10 @@ class MediaRepresentation
     public function filename(): string
     {
         return $this->filename;
+    }
+
+    public function id(): int
+    {
+        return $this->id;
     }
 }

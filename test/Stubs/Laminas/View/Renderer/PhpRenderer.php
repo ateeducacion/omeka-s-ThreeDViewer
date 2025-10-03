@@ -6,9 +6,14 @@ namespace Laminas\View\Renderer;
 
 class PhpRenderer
 {
-    public function headScript()
+    /** @var object */
+    private $headScript;
+    /** @var object */
+    private $headStyle;
+
+    public function __construct()
     {
-        return new class {
+        $this->headScript = new class {
             /** @var array<int, string> */
             public array $files = [];
             public function appendFile(string $url, $type = null): void
@@ -19,6 +24,20 @@ class PhpRenderer
             {
             }
         };
+
+        $this->headStyle = new class {
+            /** @var array<int, string> */
+            public array $styles = [];
+            public function appendStyle(string $style): void
+            {
+                $this->styles[] = $style;
+            }
+        };
+    }
+
+    public function headScript()
+    {
+        return $this->headScript;
     }
 
     public function inlineScript()
@@ -28,11 +47,7 @@ class PhpRenderer
 
     public function headStyle()
     {
-        return new class {
-            public function appendStyle(string $style): void
-            {
-            }
-        };
+        return $this->headStyle;
     }
 
     public function assetUrl(string $path, ?string $module = null): string
@@ -57,6 +72,11 @@ class PhpRenderer
     }
 
     public function escapeHtmlAttr(string $value): string
+    {
+        return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    }
+
+    public function escapeHtml(string $value): string
     {
         return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }
