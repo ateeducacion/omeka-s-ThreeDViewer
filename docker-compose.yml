@@ -22,7 +22,6 @@ services:
       OMEKA_SITE_TITLE: "Omeka S Sample Site"
       # Auto-import sample data CSV on first boot (requires CSVImport module)
       OMEKA_CSV_IMPORT_FILE: /data/sample_data.csv
-
       # App environment and base URL
       APPLICATION_ENV: development
       SITE_URL: http://localhost:8080
@@ -39,7 +38,7 @@ services:
       PRE_CONFIGURE_COMMANDS: |
         echo 'Pre-configure hook'
       POST_CONFIGURE_COMMANDS: |
-        echo 'Post-configure: ensure editor user and enable Impersonate'
+        echo 'Post-configure: ensure editor user and enable modules'
 
         # Create an Editor user if missing
         if ! omeka-s-cli user:list --json | jq -e '.[] | select(.email == "editor@example.com")' >/dev/null; then
@@ -51,6 +50,12 @@ services:
 
         # Enable the ThreeDViewer module from local source
         omeka-s-cli module:install ThreeDViewer
+
+        # Ensure CSVImport is installed (in case auto-install didn't yet)
+        omeka-s-cli module:install CSVImport || true
+
+        # Import via the image-provided CLI importer script, acting as admin
+        php import_cli.php /data/sample_3d_data.csv
 
     volumes:
       - omekas_data:/var/www/html/volume:Z

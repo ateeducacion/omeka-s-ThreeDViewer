@@ -46,7 +46,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Viewer3DTest\\": "test/"
+            "Viewer3DTest\\": "test/",
+            "Omeka\\": "test/Stubs/Omeka/"
         }
     },
     "repositories": [

@@ -47,6 +47,15 @@ make up
 
 Then open [http://localhost:8080](http://localhost:8080).
 
+### Sample data import
+
+On first boot, the container automatically installs CSVImport and, if `data/sample_3d_data.csv` is present, imports it so you immediately have items to test the viewer. To trigger a manual import inside the container, run:
+
+```
+make shell
+cd /var/www/html && OMEKA_CSV_IMPORT_FILE=/data/sample_3d_data.csv php import_cli.php "$OMEKA_CSV_IMPORT_FILE"
+```
+
 ### Preconfigured users
 
 The environment automatically creates several users with different roles:
