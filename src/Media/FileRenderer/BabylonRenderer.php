@@ -15,6 +15,10 @@ class BabylonRenderer extends Abstract3DRenderer implements RendererInterface
 
         $view->headScript()->appendFile('https://cdn.babylonjs.com/babylon.js');
         $view->headScript()->appendFile('https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js');
+        if ($config['babylonShowToolbar']) {
+            $view->headScript()->appendFile('https://cdn.babylonjs.com/inspector/babylon.inspector.bundle.js');
+        }
+
         $view->headScript()->appendFile($view->assetUrl('js/babylon-viewer.js', 'ThreeDViewer'));
 
         $view->headStyle()->appendStyle('
@@ -69,6 +73,7 @@ class BabylonRenderer extends Abstract3DRenderer implements RendererInterface
             . 'data-environment="' . $view->escapeHtmlAttr($config['babylonEnvironment']) . '" '
             . 'data-enable-xr="' . ($config['babylonEnableXR'] ? 'true' : 'false') . '" '
             . 'data-show-grid="' . ($config['showGrid'] ? 'true' : 'false') . '" '
+            . 'data-show-inspector="' . ($config['babylonShowToolbar'] ? 'true' : 'false') . '" '
             . 'data-loading-id="' . $view->escapeHtmlAttr($loadingId) . '"></canvas>'
             . '</div>';
     }

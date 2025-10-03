@@ -140,5 +140,20 @@ class ConfigForm extends Form
                 'value' => '0',
             ],
         ]);
+
+        $this->add([
+            'name' => 'threedviewer_babylon_show_toolbar',
+            'type' => Element\Checkbox::class,
+            'options' => [
+                'label' => 'Show Babylon.js toolbar', // @translate
+                'info' => 'Display the Babylon.js inspector toolbar for additional camera and scene controls.', // @translate
+                'use_hidden_element' => true,
+                'checked_value' => '1',
+                'unchecked_value' => '0',
+            ],
+            'attributes' => [
+                'value' => '0',
+            ],
+        ]);
     }
 }

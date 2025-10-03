@@ -107,6 +107,7 @@ class Module extends AbstractModule
             'threedviewer_babylon_lighting' => $settings->get('threedviewer_babylon_lighting', 'hemispheric'),
             'threedviewer_babylon_environment' => $settings->get('threedviewer_babylon_environment', 'none'),
             'threedviewer_babylon_enable_xr' => $settings->get('threedviewer_babylon_enable_xr', false) ? '1' : '0',
+            'threedviewer_babylon_show_toolbar' => $settings->get('threedviewer_babylon_show_toolbar', false) ? '1' : '0',
         ]);
         
         return $renderer->formCollection($form, false);
@@ -134,5 +135,7 @@ class Module extends AbstractModule
         $settings->set('threedviewer_babylon_environment', $config['threedviewer_babylon_environment'] ?? 'none');
         $settings->set('threedviewer_babylon_enable_xr',
             isset($config['threedviewer_babylon_enable_xr']) && $config['threedviewer_babylon_enable_xr'] === '1');
+        $settings->set('threedviewer_babylon_show_toolbar',
+            isset($config['threedviewer_babylon_show_toolbar']) && $config['threedviewer_babylon_show_toolbar'] === '1');
     }
 }

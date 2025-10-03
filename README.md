@@ -35,7 +35,8 @@ See general end user documentation for [Installing a module](http://omeka.org/s/
    - Right-click and drag to pan
    - Scroll to zoom in and out
 4. The module settings allow administrators to customize the default display options powered by Babylon.js, including camera
-   behaviors, lighting presets, an optional environment ground/skybox, and opt-in WebXR (VR/AR) support for capable browsers.
+   behaviors, lighting presets, an optional environment ground/skybox, opt-in WebXR (VR/AR) support for capable browsers,
+   and an advanced Babylon.js toolbar for fine-tuning scenes on demand.
 
 ## Local Development with Docker
 

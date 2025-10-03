@@ -70,6 +70,7 @@ return [
             'threedviewer_babylon_lighting' => 'hemispheric',
             'threedviewer_babylon_environment' => 'none',
             'threedviewer_babylon_enable_xr' => false,
+            'threedviewer_babylon_show_toolbar' => false,
         ]
     ],
 ];

@@ -20,6 +20,32 @@
         };
     }
 
+    function configureArcCamera(camera, bounds) {
+        if (!camera) {
+            return;
+        }
+
+        const radiusSource = bounds && isFinite(bounds.radius) ? bounds.radius : 1;
+        const radius = Math.max(radiusSource, 0.1);
+        const viewRadius = Math.max(radius * 2.5, radius + 1.5);
+        camera.radius = viewRadius;
+        camera.lowerRadiusLimit = Math.max(radius * 0.5, 0.1);
+        camera.upperRadiusLimit = Math.max(viewRadius * 4, radius * 12);
+        camera.minZ = Math.max(radius * 0.01, 0.01);
+        camera.maxZ = Math.max(radius * 200, viewRadius * 8);
+        camera.wheelDeltaPercentage = 0.01;
+        camera.pinchDeltaPercentage = 0.01;
+
+        camera.useFramingBehavior = true;
+        const framingBehavior = camera.getBehaviorByName('Framing');
+        if (framingBehavior) {
+            framingBehavior.framingTime = 500;
+            framingBehavior.elevationReturnTime = -1;
+            framingBehavior.zoomStopsAnimation = true;
+            framingBehavior.radiusScale = 1.5;
+        }
+    }
+
     function createCamera(scene, canvas, type) {
         switch (type) {
             case 'universal':
@@ -126,6 +152,8 @@
                 const minMax = BABYLON.Mesh.MinMax(meshes);
                 const center = BABYLON.Vector3.Center(minMax.min, minMax.max);
                 const extents = minMax.max.subtract(minMax.min);
+                const boundingInfo = new BABYLON.BoundingInfo(minMax.min, minMax.max);
+                const sphere = boundingInfo.boundingSphere;
                 const maxExtent = Math.max(extents.x, extents.y, extents.z, 1);
 
                 if (camera && camera.setTarget) {
@@ -133,12 +161,23 @@
                 }
 
                 if (camera instanceof BABYLON.ArcRotateCamera) {
-                    camera.radius = maxExtent * 1.75;
-                    camera.lowerRadiusLimit = maxExtent * 0.25;
-                    camera.upperRadiusLimit = maxExtent * 5;
+                    configureArcCamera(camera, sphere);
                 } else if (camera instanceof BABYLON.UniversalCamera) {
-                    camera.position = center.add(new BABYLON.Vector3(maxExtent, maxExtent, -maxExtent * 2));
+                    const fallbackExtent = Math.max(maxExtent, 1);
+                    const offset = Math.max(sphere.radius * 2.5, fallbackExtent * 1.5);
+                    camera.position = center.add(new BABYLON.Vector3(offset, offset, -offset));
+                    camera.minZ = Math.max(sphere.radius * 0.01, 0.01);
+                    camera.maxZ = Math.max(sphere.radius * 200, offset * 20);
                 }
+            }
+
+            if (canvas.dataset.showInspector === 'true' && scene.debugLayer) {
+                scene.debugLayer.show({
+                    embedMode: true,
+                    inspectorURL: 'https://cdn.babylonjs.com/inspector/babylon.inspector.bundle.js'
+                }).catch(function (error) {
+                    console.warn('Unable to show Babylon.js inspector.', error);
+                });
             }
         }, null, function (_, message, exception) {
             if (loadingElement) {
