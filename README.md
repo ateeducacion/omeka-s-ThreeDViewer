@@ -1,6 +1,6 @@
 # ThreeDViewer (3D) Module for Omeka S
 
-![Screenshot of the 3D Viewer](https://github.com/ateeducacion/omeka-s-ThreeDViewer/blob/main/.github/assets/screenshot.png)
+![Screenshot of the 3D Viewer](https://raw.githubusercontent.com/ateeducacion/omeka-s-ThreeDViewer/refs/heads/main/.github/assets/screenshot.png)
 
 This module allows users to view and interact with 3D models (STL and GLB files) directly within Omeka S.
 
@@ -21,23 +21,6 @@ This module allows users to view and interact with 3D models (STL and GLB files)
 3. Log in to the Omeka S admin panel and navigate to Modules
 5. Click "Install" next to Three3DViewer
 
-### Using Docker
-
-A Docker Compose file is provided for easy testing:
-
-1. Make sure you have Docker and Docker Compose installed
-2. Clone this repository
-3. From the repository root, run:
-
-```bash
-make up
-```
-
-4. Wait for the containers to start (this may take a minute)
-5. Access Omeka S at http://localhost:8080
-6. Finish the installation and login as admin user
-7. Navigate to Modules and install the Three3DViewer module
-
 ## Installation
 
 See general end user documentation for [Installing a module](http://omeka.org/s/docs/user-manual/modules/#installing-modules)
@@ -52,11 +35,38 @@ See general end user documentation for [Installing a module](http://omeka.org/s/
    - Scroll to zoom in and out
 4. The module settings allow administrators to customize the default display options
 
-## Requirements
+## Local Development with Docker
 
-- Omeka S 4.x or later
-- Modern browser with WebGL support (Chrome, Firefox, Safari, Edge)
+This repository includes a **Makefile** and a `docker-compose.yml` for quick local development using [erseco/alpine-omeka-s](https://github.com/erseco/alpine-omeka-s).
 
-## License
+### Quick start
 
-This module is published under the [GNU GPLv3](LICENSE) license.
+```bash
+make up
+```
+
+Then open [http://localhost:8080](http://localhost:8080).
+
+### Preconfigured users
+
+The environment automatically creates several users with different roles:
+
+| Email                                                   | Role         | Password        |
+| ------------------------------------------------------- | ------------ | --------------- |
+| [admin@example.com](mailto:admin@example.com)           | global_admin | PLEASE_CHANGEME |
+| [editor@example.com](mailto:editor@example.com)         | editor       | 1234            |
+
+The **ThreeDViewer module** is automatically enabled, so you can start testing right away.
+
+### Useful Make commands
+
+* `make up` – Start Docker containers in interactive mode
+* `make upd` – Start in detached mode (background)
+* `make down` – Stop and remove containers
+* `make shell` – Open a shell inside the Omeka S container
+* `make lint` – Run PHP_CodeSniffer
+* `make fix` – Auto-fix coding style issues
+* `make package VERSION=1.2.3` – Build a `.zip` release of the module
+* `make test` – Run PHPUnit tests
+
+Run `make help` for a full list.
