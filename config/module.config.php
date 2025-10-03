@@ -16,6 +16,7 @@ return [
             Form\ConfigForm::class => Form\ConfigForm::class,
             Form\SettingsFieldset::class => Form\SettingsFieldset::class,
             Form\SiteSettingsFieldset::class => Form\SiteSettingsFieldset::class,
+            Form\Sketchfab::class => Form\Sketchfab::class,
         ],
     ],
 
@@ -39,6 +40,7 @@ return [
         'invokables' => [
             'stl_renderer' => Media\FileRenderer\StlRenderer::class,
             'glb_renderer' => Media\FileRenderer\GlbRenderer::class,
+            'sketchfab_renderer' => Media\FileRenderer\SketchfabRenderer::class,
             'viewer3d_renderer' => Media\FileRenderer\Viewer3DRenderer::class,
         ],
         'aliases' => [
@@ -48,14 +50,11 @@ return [
             'application/octet-stream' => 'viewer3d_renderer',
             'binary/octet-stream' => 'viewer3d_renderer',
             'application/x-binary' => 'viewer3d_renderer',
-            // These aliases map MIME types and common identifiers to the appropriate renderer.
-            // The alias for 'text/plain' allows rendering of 3D files that are correctly named
-            // (e.g. .stl or .glb) but incorrectly labeled with a generic MIME type.
-            // The renderer will rely on the file extension in these cases.
             'text/plain' => 'viewer3d_renderer',
             'stl' => 'stl_renderer',
             'glb' => 'glb_renderer',
             'gltf' => 'glb_renderer',
+            'sketchfab' => 'sketchfab_renderer',
         ],
     ],
     'translator' => [

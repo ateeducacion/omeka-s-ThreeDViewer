@@ -26,12 +26,16 @@ class Viewer3DRenderer implements RendererInterface
      */
     public function render(PhpRenderer $view, MediaRepresentation $media, array $options = []): string
     {
+        $sketchfabUid = $media->value('three_d_viewer_sketchfab_uid', ['default' => '']);
+
+        if (!empty($sketchfabUid)) {
+            $renderer = new SketchfabRenderer();
+            return $renderer->render($view, $media, $options);
+        }
+
         if (!$this->is3DFile($media)) {
-            // Get URLs correctly using view helpers
             $fileUrl = $media->originalUrl();
             $fileName = pathinfo($fileUrl, PATHINFO_BASENAME);
-            
-            // Use the view helper for the default thumbnail URL
             $thumbnailUrl = $view->assetUrl('thumbnails/default.png', 'Omeka');
             
             $html = '<div class="media-render file">';
@@ -44,13 +48,10 @@ class Viewer3DRenderer implements RendererInterface
 
         $filename = $media->filename();
         $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-        error_log("Processing 3D file: $filename");
 
         if ($extension === 'stl') {
-            error_log("Using STL renderer for: $filename");
             $renderer = new StlRenderer();
         } else {
-            error_log("Using GLB renderer for: $filename");
             $renderer = new GlbRenderer();
         }
         return $renderer->render($view, $media, $options);

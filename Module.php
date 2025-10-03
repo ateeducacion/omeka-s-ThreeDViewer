@@ -12,12 +12,52 @@ use Omeka\Module\AbstractModule;
 use Omeka\Mvc\Controller\Plugin\Messenger;
 use Omeka\Stdlib\Message;
 use ThreeDViewer\Form\ConfigForm;
+use ThreeDViewer\Form\Sketchfab;
 
 /**
  * Main class for the 3DViewer module.
  */
 class Module extends AbstractModule
 {
+    public function attachListeners(SharedEventManagerInterface $sharedEventManager): void
+    {
+        $sharedEventManager->attach(
+            'Omeka\Controller\Admin\Media',
+            'view.admin.media.edit.form.after',
+            [$this, 'handleMediaEditForm']
+        );
+
+        $sharedEventManager->attach(
+            'Omeka\Api\Adapter\MediaAdapter',
+            'api.server.adapter.update.post',
+            [$this, 'handleMediaSave']
+        );
+
+        $sharedEventManager->attach(
+            'Omeka\Api\Adapter\MediaAdapter',
+            'api.server.adapter.create.post',
+            [$this, 'handleMediaSave']
+        );
+    }
+
+    public function handleMediaEditForm(Event $event): void
+    {
+        $view = $event->getTarget();
+        $media = $view->media;
+        $form = new Sketchfab();
+        $form->init();
+        $form->setData($media->values());
+        echo $view->formCollection($form, false);
+    }
+
+    public function handleMediaSave(Event $event): void
+    {
+        $entity = $event->getParam('entity');
+        $body = $event->getParam('body');
+        if (isset($body['three_d_viewer_sketchfab_uid'])) {
+            $entity->setValue('three_d_viewer_sketchfab_uid', $body['three_d_viewer_sketchfab_uid']);
+        }
+    }
     /**
      * Retrieve the configuration array.
      *
