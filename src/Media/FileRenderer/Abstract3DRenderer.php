@@ -5,7 +5,7 @@ namespace ThreeDViewer\Media\FileRenderer;
 
 use Omeka\Api\Representation\MediaRepresentation;
 use Laminas\View\Renderer\PhpRenderer;
-use Omeka\Media\Renderer\RendererInterface;
+use Omeka\Media\FileRenderer\RendererInterface;
 
 abstract class Abstract3DRenderer implements RendererInterface
 {

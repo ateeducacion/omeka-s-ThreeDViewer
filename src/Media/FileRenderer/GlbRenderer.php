@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace ThreeDViewer\Media\FileRenderer;
 
-use Omeka\Media\Renderer\RendererInterface;
+use Omeka\Media\FileRenderer\RendererInterface;
 
 use Laminas\View\Renderer\PhpRenderer;
 use Omeka\Api\Representation\MediaRepresentation;
