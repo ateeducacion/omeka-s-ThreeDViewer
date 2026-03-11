@@ -1,5 +1,8 @@
 {
   "$schema": "https://ateeducacion.github.io/assets/blueprints/blueprint-schema.json",
+  "debug": {
+      "enabled": true
+  },
   "landingPage": "/admin",
   "siteOptions": {
     "title": "ThreeDViewer Playground",
