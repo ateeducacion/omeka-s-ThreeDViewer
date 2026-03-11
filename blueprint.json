@@ -1,0 +1,33 @@
+{
+  "$schema": "https://ateeducacion.github.io/assets/blueprints/blueprint-schema.json",
+  "landingPage": "/admin",
+  "siteOptions": {
+    "title": "ThreeDViewer Playground",
+    "locale": "es",
+    "timezone": "Atlantic/Canary"
+  },
+  "users": [
+    {
+      "username": "admin",
+      "email": "admin@example.com",
+      "password": "password",
+      "role": "global_admin"
+    }
+  ],
+  "modules": [
+    {
+      "name": "ThreeDViewer",
+      "state": "activate",
+      "source": {
+        "type": "url",
+        "url": "https://github.com/ateeducacion/omeka-s-ThreeDViewer/archive/refs/heads/main.zip"
+      }
+    }
+  ],
+  "site": {
+    "title": "ThreeDViewer Demo",
+    "slug": "demo",
+    "theme": "default",
+    "setAsDefault": true
+  }
+}
