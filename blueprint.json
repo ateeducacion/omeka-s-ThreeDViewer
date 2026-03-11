@@ -1,5 +1,5 @@
 {
-  "$schema": "https://ateeducacion.github.io/assets/blueprints/blueprint-schema.json",
+  "$schema": "https://ateeducacion.github.io/omeka-s-playground/assets/blueprints/blueprint-schema.json",
   "debug": {
       "enabled": true
   },
@@ -27,10 +27,72 @@
       }
     }
   ],
+  "itemSets": [
+    {
+      "title": "ThreeDViewer Samples",
+      "description": "Modelos 3D remotos listos para probar el visor en Omeka S Playground."
+    }
+  ],
+  "items": [
+    {
+      "title": "Duck glTF",
+      "description": "Modelo GLB de ejemplo de Khronos para validar la carga del visor.",
+      "creator": "Khronos Group",
+      "itemSets": ["ThreeDViewer Samples"],
+      "media": [
+        {
+          "type": "url",
+          "url": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb",
+          "title": "Duck.glb"
+        }
+      ]
+    },
+    {
+      "title": "Avocado glTF",
+      "description": "Segundo ejemplo GLB remoto para probar otro modelo con geometria y materiales distintos.",
+      "creator": "Khronos Group",
+      "itemSets": ["ThreeDViewer Samples"],
+      "media": [
+        {
+          "type": "url",
+          "url": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Avocado/glTF-Binary/Avocado.glb",
+          "title": "Avocado.glb"
+        }
+      ]
+    },
+    {
+      "title": "BoomBox glTF",
+      "description": "Ejemplo GLB adicional para comprobar escenas con otro volumen y texturas.",
+      "creator": "Khronos Group",
+      "itemSets": ["ThreeDViewer Samples"],
+      "media": [
+        {
+          "type": "url",
+          "url": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoomBox/glTF-Binary/BoomBox.glb",
+          "title": "BoomBox.glb"
+        }
+      ]
+    },
+    {
+      "title": "AT&T Building",
+      "description": "Modelo STL remoto de Stephen Yeargin para validar tambien el renderer STL.",
+      "creator": "Stephen Yeargin",
+      "itemSets": ["ThreeDViewer Samples"],
+      "media": [
+        {
+          "type": "url",
+          "url": "https://raw.githubusercontent.com/stephenyeargin/stl-files/main/AT%26T%20Building.stl",
+          "title": "AT&T Building.stl"
+        }
+      ]
+    }
+  ],
   "site": {
     "title": "ThreeDViewer Demo",
     "slug": "demo",
     "theme": "default",
+    "summary": "Sitio de demostracion con modelos GLB y STL remotos para probar ThreeDViewer rapidamente.",
+    "isPublic": true,
     "setAsDefault": true
   }
 }
