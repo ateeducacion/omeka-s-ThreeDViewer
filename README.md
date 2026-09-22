@@ -1,5 +1,8 @@
 # ThreeDViewer (3D) Module for Omeka S
 
+[![codecov](https://codecov.io/gh/ateeducacion/omeka-s-ThreeDViewer/branch/main/graph/badge.svg)](https://codecov.io/gh/ateeducacion/omeka-s-ThreeDViewer)
+
+
 <a href="https://ateeducacion.github.io/omeka-s-playground/?blueprint=https%3A%2F%2Fraw.githubusercontent.com%2Fateeducacion%2Fomeka-s-ThreeDViewer%2Frefs%2Fheads%2Fmain%2Fblueprint.json">
   <img src="https://raw.githubusercontent.com/ateeducacion/omeka-s-ThreeDViewer/refs/heads/main/.github/assets/playground-preview-button.svg" alt="Try ThreeDViewer in your browser" width="224">
 </a><br>
@@ -88,3 +91,7 @@ The **ThreeDViewer module** is automatically enabled, so you can start testing r
 * `make test` – Run PHPUnit tests
 
 Run `make help` for a full list.
+
+## Coverage
+
+Run `make test-coverage` with PCOV or Xdebug enabled. CI measures `Module.php` and all PHP files in `src/`, requires at least 90% line coverage, and uploads the Clover report to Codecov using GitHub OIDC. Codecov requires 90% for both project and patch coverage.
