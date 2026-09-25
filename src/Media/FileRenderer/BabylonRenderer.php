@@ -51,7 +51,11 @@ class BabylonRenderer extends Abstract3DRenderer implements RendererInterface
             }
         ');
 
-        $infoPanel = $this->renderInfoPanel($view, 'Babylon.js Viewer', $config['showGrid']);
+        $infoPanel = $this->renderInfoPanel(
+            $view,
+            'Babylon.js Viewer', // @translate
+            $config['showGrid']
+        );
 
         $rawUrl = $media->originalUrl();
         $protocolRelativeUrl = preg_replace('/^https?:/', '', $rawUrl);

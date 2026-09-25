@@ -22,7 +22,11 @@ class GlbRenderer extends Abstract3DRenderer implements RendererInterface
             $view->headScript()->appendFile($view->assetUrl('js/model-viewer-lighting.js', 'ThreeDViewer'));
         }
 
-        $infoPanel = $this->renderInfoPanel($view, 'GLB Viewer', $config['showGrid']);
+        $infoPanel = $this->renderInfoPanel(
+            $view,
+            'GLB Viewer', // @translate
+            $config['showGrid']
+        );
 
         $rawUrl = $media->originalUrl();
         $protocolRelativeUrl = preg_replace('/^https?:/', '', $rawUrl);

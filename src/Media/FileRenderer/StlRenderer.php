@@ -36,7 +36,11 @@ class StlRenderer extends Abstract3DRenderer implements RendererInterface
             .hidden { display: none !important; }
         ');
 
-        $infoPanel = $this->renderInfoPanel($view, 'STL Viewer', $config['showGrid']);
+        $infoPanel = $this->renderInfoPanel(
+            $view,
+            'STL Viewer', // @translate
+            $config['showGrid']
+        );
 
         $rawUrl = $media->originalUrl();
         $protocolRelativeUrl = preg_replace('/^https?:/', '', $rawUrl);

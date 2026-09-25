@@ -172,8 +172,7 @@ class ConfigForm extends Form
             'type' => Element\Checkbox::class,
             'options' => [
                 'label' => 'Show Babylon.js toolbar', // @translate
-                'info' => 'Display the Babylon.js inspector toolbar for additional camera '
-                    . 'and scene controls.', // @translate
+                'info' => 'Show the Babylon.js inspector toolbar with extra camera and scene controls.', // @translate
                 'use_hidden_element' => true,
                 'checked_value' => '1',
                 'unchecked_value' => '0',
