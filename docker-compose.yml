@@ -41,7 +41,7 @@ services:
         echo 'Post-configure: ensure editor user and enable modules'
 
         # Create an Editor user if missing
-        if ! omeka-s-cli user:list --json | jq -e '.[] | select(.email == "editor@example.com")' >/dev/null; then
+        if ! omeka-s-cli user:exists "editor@example.com" >/dev/null 2>&1; then
           echo "Creating user editor@example.com with role editor..."
           omeka-s-cli user:add "editor@example.com" "Editor" editor "1234"
         else
