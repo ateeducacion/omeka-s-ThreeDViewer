@@ -97,6 +97,19 @@ class ConfigForm extends Form
         ]);
 
         $this->add([
+            'name' => 'threedviewer_lighting_mode',
+            'type' => Element\Select::class,
+            'options' => [
+                'label' => 'Lighting', // @translate
+                'info' => 'Fixed to the viewer keeps the lights in place as you turn the model.', // @translate
+                'value_options' => [
+                    'model' => 'Fixed to the model', // @translate
+                    'viewer' => 'Fixed to the viewer', // @translate
+                ],
+            ],
+        ]);
+
+        $this->add([
             'name' => 'threedviewer_babylon_camera',
             'type' => Element\Select::class,
             'options' => [
@@ -159,8 +172,7 @@ class ConfigForm extends Form
             'type' => Element\Checkbox::class,
             'options' => [
                 'label' => 'Show Babylon.js toolbar', // @translate
-                'info' => 'Display the Babylon.js inspector toolbar for additional camera '
-                    . 'and scene controls.', // @translate
+                'info' => 'Show the Babylon.js inspector toolbar with extra camera and scene controls.', // @translate
                 'use_hidden_element' => true,
                 'checked_value' => '1',
                 'unchecked_value' => '0',

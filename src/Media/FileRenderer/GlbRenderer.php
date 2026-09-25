@@ -18,8 +18,15 @@ class GlbRenderer extends Abstract3DRenderer implements RendererInterface
             $view->assetUrl('vendor/model-viewer/model-viewer.min.js', 'ThreeDViewer'),
             'module'
         );
+        if ($config['lightingMode'] === 'viewer') {
+            $view->headScript()->appendFile($view->assetUrl('js/model-viewer-lighting.js', 'ThreeDViewer'));
+        }
 
-        $infoPanel = $this->renderInfoPanel($view, 'GLB Viewer', $config['showGrid']);
+        $infoPanel = $this->renderInfoPanel(
+            $view,
+            'GLB Viewer', // @translate
+            $config['showGrid']
+        );
 
         $rawUrl = $media->originalUrl();
         $protocolRelativeUrl = preg_replace('/^https?:/', '', $rawUrl);
@@ -32,6 +39,7 @@ class GlbRenderer extends Abstract3DRenderer implements RendererInterface
              . $infoPanel
              . '<model-viewer src="' . $modelViewerSrc . '" '
              . 'alt="' . $altText . '" camera-controls '
+             . 'data-lighting-mode="' . $config['lightingMode'] . '" '
              . $autoRotate
              . 'style="width: 100%; height: 100%; background-color: ' . $background . ';">'
              . '</model-viewer>'

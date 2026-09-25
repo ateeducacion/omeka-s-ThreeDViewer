@@ -51,7 +51,11 @@ class BabylonRenderer extends Abstract3DRenderer implements RendererInterface
             }
         ');
 
-        $infoPanel = $this->renderInfoPanel($view, 'Babylon.js Viewer', $config['showGrid']);
+        $infoPanel = $this->renderInfoPanel(
+            $view,
+            'Babylon.js Viewer', // @translate
+            $config['showGrid']
+        );
 
         $rawUrl = $media->originalUrl();
         $protocolRelativeUrl = preg_replace('/^https?:/', '', $rawUrl);
@@ -70,6 +74,7 @@ class BabylonRenderer extends Abstract3DRenderer implements RendererInterface
             . 'data-auto-rotate="' . ($config['autoRotate'] ? 'true' : 'false') . '" '
             . 'data-camera="' . $view->escapeHtmlAttr($config['babylonCamera']) . '" '
             . 'data-lighting="' . $view->escapeHtmlAttr($config['babylonLighting']) . '" '
+            . 'data-lighting-mode="' . $config['lightingMode'] . '" '
             . 'data-environment="' . $view->escapeHtmlAttr($config['babylonEnvironment']) . '" '
             . 'data-enable-xr="' . ($config['babylonEnableXR'] ? 'true' : 'false') . '" '
             . 'data-show-grid="' . ($config['showGrid'] ? 'true' : 'false') . '" '

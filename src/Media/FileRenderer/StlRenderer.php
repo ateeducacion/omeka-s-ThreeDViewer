@@ -36,7 +36,11 @@ class StlRenderer extends Abstract3DRenderer implements RendererInterface
             .hidden { display: none !important; }
         ');
 
-        $infoPanel = $this->renderInfoPanel($view, 'STL Viewer', $config['showGrid']);
+        $infoPanel = $this->renderInfoPanel(
+            $view,
+            'STL Viewer', // @translate
+            $config['showGrid']
+        );
 
         $rawUrl = $media->originalUrl();
         $protocolRelativeUrl = preg_replace('/^https?:/', '', $rawUrl);
@@ -47,7 +51,8 @@ class StlRenderer extends Abstract3DRenderer implements RendererInterface
              . '" data-foreground-color="' . $view->escapeHtmlAttr($config['foregroundColor'])
              . '" data-background-color="' . $view->escapeHtmlAttr($config['backgroundColor'])
              . '" data-auto-rotate="' . ($config['autoRotate'] ? 'true' : 'false')
-             . '" data-show-grid="' . ($config['showGrid'] ? 'true' : 'false') . '">'
+             . '" data-show-grid="' . ($config['showGrid'] ? 'true' : 'false')
+             . '" data-lighting-mode="' . $config['lightingMode'] . '">'
              . 'Loading STL model...</div>';
     }
 }

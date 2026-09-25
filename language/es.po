@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ThreeDViewer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-07 22:05+0100\n"
+"POT-Creation-Date: 2026-09-25 18:05+0100\n"
 "PO-Revision-Date: 2023-11-15 12:00+0000\n"
 "Last-Translator: Área de Tecnología Educativa <ate@gobiernodecanarias.org>\n"
 "Language-Team: Spanish\n"
@@ -12,54 +12,175 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/Media/FileRenderer/Abstract3DRenderer.php:70
+#: src/Media/FileRenderer/BabylonRenderer.php:69
+msgid "Loading 3D model..."
+msgstr "Cargando modelo 3D..."
+
+#: src/Media/FileRenderer/Abstract3DRenderer.php:95
 msgid "Use mouse to rotate, zoom and pan"
 msgstr "Usa el ratón para rotar, hacer zoom y desplazar"
 
 #: src/Form/ConfigForm.php:21
+msgid "3D viewer library"
+msgstr "Biblioteca del visor 3D"
+
+#: src/Form/ConfigForm.php:22
+msgid "Select which renderer to use for STL/GLB media."
+msgstr "Seleccione qué renderizador usar para los medios STL/GLB."
+
+#: src/Form/ConfigForm.php:24
+msgid "Three.js & model-viewer (original)"
+msgstr "Three.js y model-viewer (original)"
+
+#: src/Form/ConfigForm.php:25
+msgid "Babylon.js (experimental)"
+msgstr "Babylon.js (experimental)"
+
+#: src/Form/ConfigForm.php:34
 msgid "Viewer Height (px)"
 msgstr "Altura del visor (px)"
 
-#: src/Form/ConfigForm.php:22
+#: src/Form/ConfigForm.php:35
 msgid "Default height for the 3D viewer in pixels."
 msgstr "Altura predeterminada del visor 3D en píxeles."
 
-#: src/Form/ConfigForm.php:36
+#: src/Form/ConfigForm.php:49
 msgid "Auto-rotate models"
 msgstr "Rotar modelos automáticamente"
 
-#: src/Form/ConfigForm.php:37
+#: src/Form/ConfigForm.php:50
 msgid "Enable auto-rotation for 3D models."
 msgstr "Habilitar rotación automática para modelos 3D."
 
-#: src/Form/ConfigForm.php:48
-#, fuzzy
+#: src/Form/ConfigForm.php:64
 msgid "Foreground Color"
 msgstr "Color de objeto"
 
-#: src/Form/ConfigForm.php:49
-#, fuzzy
+#: src/Form/ConfigForm.php:65
 msgid "Choose the foreground color for 3D viewers."
 msgstr "Elija el color de objeto para los visores 3D."
 
-#: src/Form/ConfigForm.php:60
+#: src/Form/ConfigForm.php:76
 msgid "Background Color"
 msgstr "Color de fondo"
 
-#: src/Form/ConfigForm.php:61
+#: src/Form/ConfigForm.php:77
 msgid "Choose the background color for 3D viewers."
 msgstr "Elija el color de fondo para los visores 3D."
 
-#: src/Form/ConfigForm.php:72
+#: src/Form/ConfigForm.php:88
 msgid "Show Grid"
 msgstr "Mostrar rejilla"
 
-#: src/Form/ConfigForm.php:73
+#: src/Form/ConfigForm.php:89
 msgid "Display a green grid to help with size perception."
 msgstr "Mostrar una rejilla verde para ayudar con la percepción del tamaño."
 
-#~ msgid "GLB Viewer"
-#~ msgstr "Visor GLB"
+#: src/Form/ConfigForm.php:103
+msgid "Lighting"
+msgstr "Iluminación"
 
-#~ msgid "STL Viewer"
-#~ msgstr "Visor STL"
+#: src/Form/ConfigForm.php:104
+msgid "Fixed to the viewer keeps the lights in place as you turn the model."
+msgstr "Fija al visor mantiene las luces en su sitio al girar el modelo."
+
+#: src/Form/ConfigForm.php:106
+msgid "Fixed to the model"
+msgstr "Fija al modelo"
+
+#: src/Form/ConfigForm.php:107
+msgid "Fixed to the viewer"
+msgstr "Fija al visor"
+
+#: src/Form/ConfigForm.php:116
+msgid "Babylon.js camera type"
+msgstr "Tipo de cámara de Babylon.js"
+
+#: src/Form/ConfigForm.php:117
+msgid "Select the default camera when using the Babylon.js renderer."
+msgstr "Seleccione la cámara predeterminada al usar el renderizador Babylon.js."
+
+#: src/Form/ConfigForm.php:119
+msgid "Arc rotate (orbit)"
+msgstr "Rotación en arco (órbita)"
+
+#: src/Form/ConfigForm.php:120
+msgid "Universal (free look)"
+msgstr "Universal (vista libre)"
+
+#: src/Form/ConfigForm.php:121
+msgid "First-person"
+msgstr "Primera persona"
+
+#: src/Form/ConfigForm.php:130
+msgid "Babylon.js lighting preset"
+msgstr "Iluminación predefinida de Babylon.js"
+
+#: src/Form/ConfigForm.php:131
+msgid "Choose the default lighting rig for Babylon.js scenes."
+msgstr "Elija la iluminación predeterminada para las escenas de Babylon.js."
+
+#: src/Form/ConfigForm.php:133
+msgid "Hemispheric"
+msgstr "Hemisférica"
+
+#: src/Form/ConfigForm.php:134
+msgid "Directional"
+msgstr "Direccional"
+
+#: src/Form/ConfigForm.php:135
+msgid "Point light"
+msgstr "Luz puntual"
+
+#: src/Form/ConfigForm.php:136
+msgid "Environment light"
+msgstr "Luz de entorno"
+
+#: src/Form/ConfigForm.php:145
+msgid "Babylon.js environment"
+msgstr "Entorno de Babylon.js"
+
+#: src/Form/ConfigForm.php:146
+msgid "Add an optional environment/ground when using Babylon.js."
+msgstr "Añada un entorno/suelo opcional al usar Babylon.js."
+
+#: src/Form/ConfigForm.php:148
+msgid "None"
+msgstr "Ninguno"
+
+#: src/Form/ConfigForm.php:149
+msgid "Default environment"
+msgstr "Entorno predeterminado"
+
+#: src/Form/ConfigForm.php:150
+msgid "Studio with ground shadow"
+msgstr "Estudio con sombra en el suelo"
+
+#: src/Form/ConfigForm.php:159
+msgid "Enable WebXR (VR/AR) when available"
+msgstr "Activar WebXR (RV/RA) cuando esté disponible"
+
+#: src/Form/ConfigForm.php:160
+msgid "Attempt to initialise Babylon.js WebXR experience where supported."
+msgstr "Intenta iniciar la experiencia WebXR de Babylon.js donde sea compatible."
+
+#: src/Form/ConfigForm.php:174
+msgid "Show Babylon.js toolbar"
+msgstr "Mostrar la barra de herramientas de Babylon.js"
+
+#: src/Form/ConfigForm.php:175
+msgid ""
+"Show the Babylon.js inspector toolbar with extra camera and scene controls."
+msgstr "Muestra la barra del inspector de Babylon.js con controles adicionales de cámara y escena."
+
+#: src/Media/FileRenderer/BabylonRenderer.php:56
+msgid "Babylon.js Viewer"
+msgstr "Visor Babylon.js"
+
+#: src/Media/FileRenderer/GlbRenderer.php:27
+msgid "GLB Viewer"
+msgstr "Visor GLB"
+
+#: src/Media/FileRenderer/StlRenderer.php:41
+msgid "STL Viewer"
+msgstr "Visor STL"
