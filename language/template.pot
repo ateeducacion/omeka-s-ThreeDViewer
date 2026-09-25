@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 17:57+0100\n"
+"POT-Creation-Date: 2025-04-07 23:02+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,162 +17,62 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/Media/FileRenderer/BabylonRenderer.php:65
-msgid "Loading 3D model..."
-msgstr ""
-
-#: src/Media/FileRenderer/Abstract3DRenderer.php:95
+#: src/Media/FileRenderer/Abstract3DRenderer.php:70
 msgid "Use mouse to rotate, zoom and pan"
 msgstr ""
 
 #: src/Form/ConfigForm.php:21
-msgid "3D viewer library"
-msgstr ""
-
-#: src/Form/ConfigForm.php:22
-msgid "Select which renderer to use for STL/GLB media."
-msgstr ""
-
-#: src/Form/ConfigForm.php:24
-msgid "Three.js & model-viewer (original)"
-msgstr ""
-
-#: src/Form/ConfigForm.php:25
-msgid "Babylon.js (experimental)"
-msgstr ""
-
-#: src/Form/ConfigForm.php:34
 msgid "Viewer Height (px)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:35
+#: src/Form/ConfigForm.php:22
 msgid "Default height for the 3D viewer in pixels."
 msgstr ""
 
-#: src/Form/ConfigForm.php:49
+#: src/Form/ConfigForm.php:36
 msgid "Auto-rotate models"
 msgstr ""
 
-#: src/Form/ConfigForm.php:50
+#: src/Form/ConfigForm.php:37
 msgid "Enable auto-rotation for 3D models."
 msgstr ""
 
-#: src/Form/ConfigForm.php:64
+#: src/Form/ConfigForm.php:48
 msgid "Foreground Color"
 msgstr ""
 
-#: src/Form/ConfigForm.php:65
+#: src/Form/ConfigForm.php:49
 msgid "Choose the foreground color for 3D viewers."
 msgstr ""
 
-#: src/Form/ConfigForm.php:76
+#: src/Form/ConfigForm.php:60
 msgid "Background Color"
 msgstr ""
 
-#: src/Form/ConfigForm.php:77
+#: src/Form/ConfigForm.php:61
 msgid "Choose the background color for 3D viewers."
 msgstr ""
 
-#: src/Form/ConfigForm.php:88
+#: src/Form/ConfigForm.php:72
 msgid "Show Grid"
 msgstr ""
 
-#: src/Form/ConfigForm.php:89
+#: src/Form/ConfigForm.php:73
 msgid "Display a green grid to help with size perception."
 msgstr ""
 
-#: src/Form/ConfigForm.php:103
+#: src/Form/ConfigForm.php
 msgid "Lighting"
 msgstr ""
 
-#: src/Form/ConfigForm.php:104
+#: src/Form/ConfigForm.php
 msgid "Fixed to the viewer keeps the lights in place as you turn the model."
 msgstr ""
 
-#: src/Form/ConfigForm.php:106
+#: src/Form/ConfigForm.php
 msgid "Fixed to the model"
 msgstr ""
 
-#: src/Form/ConfigForm.php:107
+#: src/Form/ConfigForm.php
 msgid "Fixed to the viewer"
-msgstr ""
-
-#: src/Form/ConfigForm.php:116
-msgid "Babylon.js camera type"
-msgstr ""
-
-#: src/Form/ConfigForm.php:117
-msgid "Select the default camera when using the Babylon.js renderer."
-msgstr ""
-
-#: src/Form/ConfigForm.php:119
-msgid "Arc rotate (orbit)"
-msgstr ""
-
-#: src/Form/ConfigForm.php:120
-msgid "Universal (free look)"
-msgstr ""
-
-#: src/Form/ConfigForm.php:121
-msgid "First-person"
-msgstr ""
-
-#: src/Form/ConfigForm.php:130
-msgid "Babylon.js lighting preset"
-msgstr ""
-
-#: src/Form/ConfigForm.php:131
-msgid "Choose the default lighting rig for Babylon.js scenes."
-msgstr ""
-
-#: src/Form/ConfigForm.php:133
-msgid "Hemispheric"
-msgstr ""
-
-#: src/Form/ConfigForm.php:134
-msgid "Directional"
-msgstr ""
-
-#: src/Form/ConfigForm.php:135
-msgid "Point light"
-msgstr ""
-
-#: src/Form/ConfigForm.php:136
-msgid "Environment light"
-msgstr ""
-
-#: src/Form/ConfigForm.php:145
-msgid "Babylon.js environment"
-msgstr ""
-
-#: src/Form/ConfigForm.php:146
-msgid "Add an optional environment/ground when using Babylon.js."
-msgstr ""
-
-#: src/Form/ConfigForm.php:148
-msgid "None"
-msgstr ""
-
-#: src/Form/ConfigForm.php:149
-msgid "Default environment"
-msgstr ""
-
-#: src/Form/ConfigForm.php:150
-msgid "Studio with ground shadow"
-msgstr ""
-
-#: src/Form/ConfigForm.php:159
-msgid "Enable WebXR (VR/AR) when available"
-msgstr ""
-
-#: src/Form/ConfigForm.php:160
-msgid "Attempt to initialise Babylon.js WebXR experience where supported."
-msgstr ""
-
-#: src/Form/ConfigForm.php:174
-msgid "Show Babylon.js toolbar"
-msgstr ""
-
-#: src/Form/ConfigForm.php:176
-msgid "and scene controls."
 msgstr ""
