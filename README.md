@@ -19,6 +19,7 @@ This module allows users to view and interact with 3D models (STL and GLB files)
 - Customizable display options including background color
 - Optional auto-rotation for better visualization
 - Grid display option for better spatial reference
+- Lighting fixed to the model (default) or to the viewer, so turning a model brings its shadowed side into the light
 - Toggle between the original Three.js/model-viewer pipeline and an experimental Babylon.js renderer
 - Babylon.js renderer with configurable cameras, lighting, and WebXR support
 

@@ -68,4 +68,47 @@ class Viewer3DRendererTest extends TestCase
         $this->assertStringContainsString('class="threedviewer-babylon-canvas"', $html);
         $this->assertStringContainsString('Babylon.js Viewer', $html, 'Babylon info panel present');
     }
+
+    /**
+     * @dataProvider lightingModeCases
+     */
+    public function testEveryViewerReceivesTheLightingMode(?string $setting, string $expected): void
+    {
+        $viewers = ['model.glb' => 'model-viewer', 'mesh.stl' => 'model-viewer', 'model.gltf' => 'babylon'];
+        foreach ($viewers as $file => $library) {
+            $view = new DummyPhpRenderer();
+            $view->setSettings(array_filter([
+                'threedviewer_default_library' => $library,
+                'threedviewer_lighting_mode' => $setting,
+            ]));
+            $media = new MediaRepresentation('https://example.org/files/original/' . $file, 'Sample', $file);
+
+            $html = $this->renderer->render($view, $media, []);
+
+            $this->assertStringContainsString('data-lighting-mode="' . $expected . '"', $html, $file);
+        }
+    }
+
+    public function lightingModeCases(): array
+    {
+        return [
+            'default keeps lights fixed to the model' => [null, 'model'],
+            'viewer' => ['viewer', 'viewer'],
+            'unknown value falls back to model' => ['bogus', 'model'],
+        ];
+    }
+
+    public function testModelViewerLightingScriptLoadsOnlyForViewerMode(): void
+    {
+        $media = new MediaRepresentation('https://example.org/files/original/model.glb', 'GLB', 'model.glb');
+        $script = '/modules/ThreeDViewer/js/model-viewer-lighting.js';
+
+        $this->renderer->render($this->view, $media, []);
+        $this->assertNotContains($script, $this->view->headScript()->files);
+
+        $view = new DummyPhpRenderer();
+        $view->setSettings(['threedviewer_lighting_mode' => 'viewer']);
+        $this->renderer->render($view, $media, []);
+        $this->assertContains($script, $view->headScript()->files);
+    }
 }

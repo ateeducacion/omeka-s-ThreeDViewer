@@ -68,6 +68,26 @@ class ModuleTest extends TestCase
         $this->assertSame('babylon', $renderer->form->get('threedviewer_default_library')->getValue());
     }
 
+    public function testFormShowsLightingModeDefaultingToModel(): void
+    {
+        $renderer = new class extends PhpRenderer {
+            public $form;
+
+            public function formCollection($form, $wrap)
+            {
+                $this->form = $form;
+                return '';
+            }
+        };
+        $this->module->getConfigForm($renderer);
+        $element = $renderer->form->get('threedviewer_lighting_mode');
+        $this->assertSame('model', $element->getValue());
+        $this->assertSame(['model', 'viewer'], array_keys($element->getValueOptions()));
+        $this->settings->values['threedviewer_lighting_mode'] = 'viewer';
+        $this->module->getConfigForm($renderer);
+        $this->assertSame('viewer', $renderer->form->get('threedviewer_lighting_mode')->getValue());
+    }
+
     public function testSubmissionPersistsSettings(): void
     {
         $post = ['threedviewer_viewer_height' => 640, 'threedviewer_foreground_color' => '#000000',
@@ -93,5 +113,46 @@ class ModuleTest extends TestCase
         $this->assertTrue($this->settings->values['threedviewer_auto_rotate']);
         $this->assertFalse($this->settings->values['threedviewer_show_grid']);
         $this->assertSame('arcRotate', $this->settings->values['threedviewer_babylon_camera']);
+        $this->assertSame('model', $this->settings->values['threedviewer_lighting_mode']);
+    }
+
+    /**
+     * @dataProvider lightingModeSubmissions
+     */
+    public function testSubmissionPersistsOnlyKnownLightingModes(string $submitted, string $expected): void
+    {
+        $this->submit(['threedviewer_viewer_height' => 500, 'threedviewer_foreground_color' => '#000000',
+            'threedviewer_background_color' => '#ffffff', 'threedviewer_lighting_mode' => $submitted]);
+        $this->assertSame($expected, $this->settings->values['threedviewer_lighting_mode']);
+    }
+
+    public function lightingModeSubmissions(): array
+    {
+        return [
+            'viewer' => ['viewer', 'viewer'],
+            'model' => ['model', 'model'],
+            'unknown falls back to model' => ['<script>', 'model'],
+        ];
+    }
+
+    private function submit(array $post): void
+    {
+        $controller = $this->getMockBuilder(AbstractController::class)
+            ->disableOriginalConstructor()->onlyMethods(['params'])->getMock();
+        $params = new class ($post) {
+            private $post;
+
+            public function __construct(array $post)
+            {
+                $this->post = $post;
+            }
+
+            public function fromPost()
+            {
+                return $this->post;
+            }
+        };
+        $controller->method('params')->willReturn($params);
+        $this->module->handleConfigForm($controller);
     }
 }
