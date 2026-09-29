@@ -2,7 +2,7 @@
 name: PR Playground Preview
 
 on:
-  pull_request:
+  pull_request_target:
     paths-ignore:
       - '.agents/skills/**'
       - '.claude/skills/**'
@@ -10,14 +10,17 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
+  issues: write
 
 jobs:
   preview:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout trusted base revision
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
 
       - name: Post or update playground preview comment
         uses: actions/github-script@v9
@@ -27,12 +30,15 @@ jobs:
             const marker = '<!-- omeka-s-playground-preview -->';
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const headRef = context.payload.pull_request.head.ref;
-            const prNumber = context.payload.pull_request.number;
+            const pullRequest = context.payload.pull_request;
+            const headRepo = pullRequest.head.repo.full_name;
+            const headSha = pullRequest.head.sha;
+            const prNumber = pullRequest.number;
 
-            // Read the root blueprint and replace the module URL with the PR branch ZIP
+            // Read only the trusted base revision checked out above. Never execute
+            // code from the pull request in this privileged pull_request_target job.
             const blueprint = JSON.parse(fs.readFileSync('blueprint.json', 'utf8'));
-            const prZipUrl = `https://github.com/${owner}/${repo}/archive/refs/heads/${headRef}.zip`;
+            const prZipUrl = `https://github.com/${headRepo}/archive/${headSha}.zip`;
             if (blueprint.modules) {
               for (const mod of blueprint.modules) {
                 if (mod.source && mod.source.url && mod.source.url.includes(`${owner}/${repo}`)) {
@@ -41,7 +47,6 @@ jobs:
               }
             }
 
-            // Encode as base64url
             function toBase64url(str) {
               return Buffer.from(str)
                 .toString('base64')
@@ -63,10 +68,9 @@ jobs:
               '</a><br>',
               `<small><a href="${playgroundUrl}">Try this PR in your browser</a></small>`,
               '',
-              'This preview loads the plugin directly from the PR branch ZIP in Omeka-S Playground.',
+              'This preview loads the plugin directly from the exact pull request commit in Omeka-S Playground.',
             ].join('\n');
 
-            // Search for an existing comment with the marker
             const { data: comments } = await github.rest.issues.listComments({
               owner,
               repo,
