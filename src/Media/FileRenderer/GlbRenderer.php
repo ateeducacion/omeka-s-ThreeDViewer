@@ -14,6 +14,7 @@ class GlbRenderer extends Abstract3DRenderer implements RendererInterface
     {
         $config = $this->getViewerConfig($view);
 
+        $view->headLink()->appendStylesheet($view->assetUrl('css/model-viewer-controls.css', 'ThreeDViewer'));
         $view->headScript()->appendFile(
             $view->assetUrl('vendor/model-viewer/model-viewer.min.js', 'ThreeDViewer'),
             'module'
@@ -22,12 +23,6 @@ class GlbRenderer extends Abstract3DRenderer implements RendererInterface
         if ($config['lightingMode'] === 'viewer') {
             $view->headScript()->appendFile($view->assetUrl('js/model-viewer-lighting.js', 'ThreeDViewer'));
         }
-
-        $infoPanel = $this->renderInfoPanel(
-            $view,
-            'GLB Viewer', // @translate
-            $config['showGrid']
-        );
 
         $rawUrl = $media->originalUrl();
         $protocolRelativeUrl = preg_replace('/^https?:/', '', $rawUrl);
@@ -39,31 +34,11 @@ class GlbRenderer extends Abstract3DRenderer implements RendererInterface
         $exitFullscreen = $view->escapeHtmlAttr($view->translate('Exit fullscreen 3D model'));
         $helpLabel = $view->escapeHtmlAttr($view->translate('3D viewer controls'));
         $helpText = $view->escapeHtml($view->translate('Use mouse to rotate, zoom and pan'));
-
-        $view->headStyle()->appendStyle('
-            .threedviewer-model-stage .model-info { display: none; }
-            .threedviewer-model-stage:fullscreen { width: 100%; height: 100vh !important; }
-            .threedviewer-model-stage:fullscreen model-viewer { width: 100%; height: 100%; }
-            .threedviewer-control { position: absolute; bottom: 12px; z-index: 101; }
-            .threedviewer-fullscreen { left: 12px; cursor: pointer; }
-            .threedviewer-help { right: 12px; }
-            .threedviewer-control button, .threedviewer-help summary {
-                display: inline-flex; align-items: center; justify-content: center;
-                min-width: 36px; min-height: 36px; border: 1px solid #555;
-                border-radius: 4px; background: #fff; color: #111; cursor: pointer;
-            }
-            .threedviewer-help summary { list-style: none; }
-            .threedviewer-help summary::-webkit-details-marker { display: none; }
-            .threedviewer-help p {
-                position: absolute; right: 0; bottom: 40px; width: 220px;
-                margin: 0; padding: 10px; border-radius: 4px;
-                background: #fff; color: #111; box-shadow: 0 2px 10px #0006;
-            }
-        ');
+        $gridOverlay = $config['showGrid'] ? '<div class="grid-overlay"></div>' : '';
 
         return '<div class="threedviewer-model-stage" style="position: relative; width: 100%; height: '
              . (int) $config['height'] . 'px;">'
-             . $infoPanel
+             . $gridOverlay
              . '<model-viewer src="' . $modelViewerSrc . '" '
              . 'alt="' . $altText . '" camera-controls '
              . 'data-lighting-mode="' . $config['lightingMode'] . '" '

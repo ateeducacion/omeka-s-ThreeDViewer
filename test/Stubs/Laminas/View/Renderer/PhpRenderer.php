@@ -9,6 +9,8 @@ class PhpRenderer
     /** @var object */
     private $headScript;
     /** @var object */
+    private $headLink;
+    /** @var object */
     private $headStyle;
 
     public function __construct()
@@ -25,6 +27,17 @@ class PhpRenderer
             }
         };
 
+        $this->headLink = new class {
+            /** @var array<int, string> */
+            public array $files = [];
+            public function appendStylesheet(string $url): void
+            {
+                if (!in_array($url, $this->files, true)) {
+                    $this->files[] = $url;
+                }
+            }
+        };
+
         $this->headStyle = new class {
             /** @var array<int, string> */
             public array $styles = [];
@@ -38,6 +51,11 @@ class PhpRenderer
     public function headScript()
     {
         return $this->headScript;
+    }
+
+    public function headLink()
+    {
+        return $this->headLink;
     }
 
     public function inlineScript()

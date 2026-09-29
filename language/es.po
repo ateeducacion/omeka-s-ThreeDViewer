@@ -2,9 +2,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ThreeDViewer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 11:41-0500\n"
-"PO-Revision-Date: 2026-09-29 11:45-0500\n"
-"Last-Translator: 3DH Lab <324928685+3dhlab@users.noreply.github.com>\n"
+"POT-Creation-Date: 2026-09-29 14:42-0500\n"
+"PO-Revision-Date: 2023-11-15 12:00+0000\n"
+"Last-Translator: Área de Tecnología Educativa <ate@gobiernodecanarias.org>\n"
 "Language-Team: Spanish\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
@@ -16,19 +16,19 @@ msgstr ""
 msgid "Loading 3D model..."
 msgstr "Cargando modelo 3D..."
 
-#: src/Media/FileRenderer/GlbRenderer.php:38
+#: src/Media/FileRenderer/GlbRenderer.php:33
 msgid "View 3D model fullscreen"
 msgstr "Ver el modelo 3D en pantalla completa"
 
-#: src/Media/FileRenderer/GlbRenderer.php:39
+#: src/Media/FileRenderer/GlbRenderer.php:34
 msgid "Exit fullscreen 3D model"
 msgstr "Salir de la pantalla completa del modelo 3D"
 
-#: src/Media/FileRenderer/GlbRenderer.php:40
+#: src/Media/FileRenderer/GlbRenderer.php:35
 msgid "3D viewer controls"
 msgstr "Controles del visor 3D"
 
-#: src/Media/FileRenderer/GlbRenderer.php:41
+#: src/Media/FileRenderer/GlbRenderer.php:36
 #: src/Media/FileRenderer/Abstract3DRenderer.php:95
 msgid "Use mouse to rotate, zoom and pan"
 msgstr "Usa el ratón para rotar, hacer zoom y desplazar"
@@ -193,10 +193,6 @@ msgstr ""
 #: src/Media/FileRenderer/BabylonRenderer.php:56
 msgid "Babylon.js Viewer"
 msgstr "Visor Babylon.js"
-
-#: src/Media/FileRenderer/GlbRenderer.php:28
-msgid "GLB Viewer"
-msgstr "Visor GLB"
 
 #: src/Media/FileRenderer/StlRenderer.php:41
 msgid "STL Viewer"
