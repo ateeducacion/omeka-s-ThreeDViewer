@@ -16,6 +16,7 @@ This module allows users to view and interact with 3D models (STL and GLB files)
 
 - View 3D models (STL and GLB formats) directly in the browser
 - Interactive controls for rotating, zooming, and panning 3D models
+- Fullscreen and compact interaction-help controls for GLB/glTF models in the model-viewer renderer
 - Customizable display options including background color
 - Optional auto-rotation for better visualization
 - Grid display option for better spatial reference

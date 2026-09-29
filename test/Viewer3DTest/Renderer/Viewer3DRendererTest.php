@@ -33,6 +33,10 @@ class Viewer3DRendererTest extends TestCase
         $this->assertIsString($html);
         $this->assertStringContainsString('<model-viewer', $html, 'Should use model-viewer for GLB');
         $this->assertStringContainsString('GLB Viewer', $html, 'GLB info panel present');
+        $this->assertStringContainsString('View 3D model fullscreen', $html);
+        $this->assertStringContainsString('Exit fullscreen 3D model', $html);
+        $this->assertStringContainsString('aria-label="3D viewer controls"', $html);
+        $this->assertContains('/modules/ThreeDViewer/js/viewer-controls.js', $this->view->headScript()->files);
     }
 
     public function testRendersStlWithCustomViewer(): void
