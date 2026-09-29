@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 18:05+0100\n"
+"POT-Creation-Date: 2026-09-29 11:41-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,6 +21,19 @@ msgstr ""
 msgid "Loading 3D model..."
 msgstr ""
 
+#: src/Media/FileRenderer/GlbRenderer.php:38
+msgid "View 3D model fullscreen"
+msgstr ""
+
+#: src/Media/FileRenderer/GlbRenderer.php:39
+msgid "Exit fullscreen 3D model"
+msgstr ""
+
+#: src/Media/FileRenderer/GlbRenderer.php:40
+msgid "3D viewer controls"
+msgstr ""
+
+#: src/Media/FileRenderer/GlbRenderer.php:41
 #: src/Media/FileRenderer/Abstract3DRenderer.php:95
 msgid "Use mouse to rotate, zoom and pan"
 msgstr ""
@@ -182,7 +195,7 @@ msgstr ""
 msgid "Babylon.js Viewer"
 msgstr ""
 
-#: src/Media/FileRenderer/GlbRenderer.php:27
+#: src/Media/FileRenderer/GlbRenderer.php:28
 msgid "GLB Viewer"
 msgstr ""
 
