@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ThreeDViewer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 18:05+0100\n"
+"POT-Creation-Date: 2026-09-29 14:42-0500\n"
 "PO-Revision-Date: 2023-11-15 12:00+0000\n"
 "Last-Translator: Área de Tecnología Educativa <ate@gobiernodecanarias.org>\n"
 "Language-Team: Spanish\n"
@@ -16,6 +16,19 @@ msgstr ""
 msgid "Loading 3D model..."
 msgstr "Cargando modelo 3D..."
 
+#: src/Media/FileRenderer/GlbRenderer.php:33
+msgid "View 3D model fullscreen"
+msgstr "Ver el modelo 3D en pantalla completa"
+
+#: src/Media/FileRenderer/GlbRenderer.php:34
+msgid "Exit fullscreen 3D model"
+msgstr "Salir de la pantalla completa del modelo 3D"
+
+#: src/Media/FileRenderer/GlbRenderer.php:35
+msgid "3D viewer controls"
+msgstr "Controles del visor 3D"
+
+#: src/Media/FileRenderer/GlbRenderer.php:36
 #: src/Media/FileRenderer/Abstract3DRenderer.php:95
 msgid "Use mouse to rotate, zoom and pan"
 msgstr "Usa el ratón para rotar, hacer zoom y desplazar"
@@ -98,7 +111,8 @@ msgstr "Tipo de cámara de Babylon.js"
 
 #: src/Form/ConfigForm.php:117
 msgid "Select the default camera when using the Babylon.js renderer."
-msgstr "Seleccione la cámara predeterminada al usar el renderizador Babylon.js."
+msgstr ""
+"Seleccione la cámara predeterminada al usar el renderizador Babylon.js."
 
 #: src/Form/ConfigForm.php:119
 msgid "Arc rotate (orbit)"
@@ -162,7 +176,8 @@ msgstr "Activar WebXR (RV/RA) cuando esté disponible"
 
 #: src/Form/ConfigForm.php:160
 msgid "Attempt to initialise Babylon.js WebXR experience where supported."
-msgstr "Intenta iniciar la experiencia WebXR de Babylon.js donde sea compatible."
+msgstr ""
+"Intenta iniciar la experiencia WebXR de Babylon.js donde sea compatible."
 
 #: src/Form/ConfigForm.php:174
 msgid "Show Babylon.js toolbar"
@@ -171,15 +186,13 @@ msgstr "Mostrar la barra de herramientas de Babylon.js"
 #: src/Form/ConfigForm.php:175
 msgid ""
 "Show the Babylon.js inspector toolbar with extra camera and scene controls."
-msgstr "Muestra la barra del inspector de Babylon.js con controles adicionales de cámara y escena."
+msgstr ""
+"Muestra la barra del inspector de Babylon.js con controles adicionales de "
+"cámara y escena."
 
 #: src/Media/FileRenderer/BabylonRenderer.php:56
 msgid "Babylon.js Viewer"
 msgstr "Visor Babylon.js"
-
-#: src/Media/FileRenderer/GlbRenderer.php:27
-msgid "GLB Viewer"
-msgstr "Visor GLB"
 
 #: src/Media/FileRenderer/StlRenderer.php:41
 msgid "STL Viewer"

@@ -32,7 +32,29 @@ class Viewer3DRendererTest extends TestCase
 
         $this->assertIsString($html);
         $this->assertStringContainsString('<model-viewer', $html, 'Should use model-viewer for GLB');
-        $this->assertStringContainsString('GLB Viewer', $html, 'GLB info panel present');
+        $this->assertStringNotContainsString('model-info', $html, 'The old banner should not be rendered');
+        $this->assertStringNotContainsString('grid-overlay', $html, 'The grid is off by default');
+        $this->assertStringContainsString('View 3D model fullscreen', $html);
+        $this->assertStringContainsString('Exit fullscreen 3D model', $html);
+        $this->assertStringContainsString('aria-label="3D viewer controls"', $html);
+        $this->assertContains('/modules/ThreeDViewer/js/viewer-controls.js', $this->view->headScript()->files);
+        $this->assertContains(
+            '/modules/ThreeDViewer/css/model-viewer-controls.css',
+            $this->view->headLink()->files
+        );
+    }
+
+    public function testGlbGridIsOptionalAndStylesheetIsLoadedOnce(): void
+    {
+        $this->view->setSettings(['threedviewer_show_grid' => true]);
+        $media = new MediaRepresentation('https://example.org/files/original/model.glb', 'GLB', 'model.glb');
+
+        $first = $this->renderer->render($this->view, $media, []);
+        $second = $this->renderer->render($this->view, $media, []);
+
+        $this->assertStringContainsString('<div class="grid-overlay"></div>', $first);
+        $this->assertStringContainsString('<div class="grid-overlay"></div>', $second);
+        $this->assertCount(1, $this->view->headLink()->files);
     }
 
     public function testRendersStlWithCustomViewer(): void
