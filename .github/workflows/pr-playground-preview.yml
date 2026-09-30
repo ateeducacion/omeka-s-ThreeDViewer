@@ -2,7 +2,7 @@
 name: PR Playground Preview
 
 on:
-  pull_request_target:
+  pull_request:
     paths-ignore:
       - '.agents/skills/**'
       - '.claude/skills/**'
@@ -10,10 +10,11 @@ on:
 
 permissions:
   contents: read
-  issues: write
+  pull-requests: write
 
 jobs:
   preview:
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
       - name: Checkout trusted base revision
@@ -36,7 +37,7 @@ jobs:
             const prNumber = pullRequest.number;
 
             // Read only the trusted base revision checked out above. Never execute
-            // code from the pull request in this privileged pull_request_target job.
+            // code from the pull request in this job with comment write permissions.
             const blueprint = JSON.parse(fs.readFileSync('blueprint.json', 'utf8'));
             const prZipUrl = `https://github.com/${headRepo}/archive/${headSha}.zip`;
             if (blueprint.modules) {
