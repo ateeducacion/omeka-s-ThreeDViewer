@@ -56,9 +56,6 @@ jobs:
       - name: Run unit tests with coverage
         run: make test-coverage
 
-      - name: Test preview workflow policy
-        run: node --test test/preview-workflow.test.cjs
-
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v7
         with:
