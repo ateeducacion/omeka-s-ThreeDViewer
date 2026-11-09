@@ -126,7 +126,7 @@ msgstr "Y arriba"
 
 #: src/Form/ConfigForm.php:121
 msgid "Z up (3D printing convention)"
-msgstr "Z arriba (convención de la impresión 3D)"
+msgstr "Z arriba (convención de impresión 3D)"
 
 #: src/Form/ConfigForm.php:130
 msgid "Babylon.js camera type"
