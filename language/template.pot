@@ -471,6 +471,6 @@ msgstr ""
 msgid "3D viewer Babylon.js lighting"
 msgstr ""
 
-#: Module.php
-msgid "Invalid custom environment image URL: the default environment is used."
+#: Module.php:152 Module.php:266
+msgid "The custom environment image URL must start with http://, https:// or /."
 msgstr ""

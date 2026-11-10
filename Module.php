@@ -144,6 +144,15 @@ class Module extends AbstractModule
         foreach (Lighting::keys() as $name) {
             $inputFilter->add(['name' => $name, 'required' => false, 'allow_empty' => true]);
         }
+        $inputFilter->get('threedviewer_model_viewer_environment_url')->getValidatorChain()->attach(
+            new \Laminas\Validator\Regex([
+                'pattern' => Lighting::URL_PATTERN,
+                'messages' => [
+                    \Laminas\Validator\Regex::NOT_MATCH =>
+                        'The custom environment image URL must start with http://, https:// or /.', // @translate
+                ],
+            ])
+        );
     }
 
     /**
@@ -248,6 +257,17 @@ class Module extends AbstractModule
         
         $config = $controller->params()->fromPost();
         
+        // normalise() would drop a custom environment without a usable URL: refuse instead, saving nothing
+        $lighting = Lighting::normalise($config);
+        if (($config['threedviewer_model_viewer_environment'] ?? '') === 'custom'
+            && $lighting['threedviewer_model_viewer_environment'] !== 'custom'
+        ) {
+            (new Messenger())->addError(new Message(
+                'The custom environment image URL must start with http://, https:// or /.' // @translate
+            ));
+            return false;
+        }
+
         $settings->set('threedviewer_default_library', $config['threedviewer_default_library'] ?? 'model-viewer');
         $settings->set('threedviewer_viewer_height', $config['threedviewer_viewer_height']);
         $settings->set(
@@ -262,17 +282,8 @@ class Module extends AbstractModule
             isset($config['threedviewer_show_grid'])
                 && $config['threedviewer_show_grid'] === '1'
         );
-        $lighting = Lighting::normalise($config);
         foreach ($lighting as $key => $value) {
             $settings->set($key, $value);
-        }
-        // normalise() drops a custom environment without a usable URL: tell the admin why
-        if (($config['threedviewer_model_viewer_environment'] ?? '') === 'custom'
-            && $lighting['threedviewer_model_viewer_environment'] !== 'custom'
-        ) {
-            (new Messenger())->addWarning(new Message(
-                'Invalid custom environment image URL: the default environment is used.' // @translate
-            ));
         }
         $stlUpAxis = $config['threedviewer_stl_up_axis'] ?? '';
         $settings->set('threedviewer_stl_up_axis', in_array($stlUpAxis, ['y', 'z'], true) ? $stlUpAxis : 'current');
