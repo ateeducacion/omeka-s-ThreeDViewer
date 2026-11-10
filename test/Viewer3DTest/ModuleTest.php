@@ -13,6 +13,7 @@ use Laminas\EventManager\Event;
 use Laminas\EventManager\SharedEventManagerInterface;
 use Laminas\Form\Form;
 use Laminas\InputFilter\InputFilter;
+use Omeka\Mvc\Controller\Plugin\Messenger;
 use ThreeDViewer\Settings\Lighting;
 
 class ModuleTest extends TestCase
@@ -23,6 +24,7 @@ class ModuleTest extends TestCase
 
     protected function setUp(): void
     {
+        Messenger::$warnings = [];
         $this->settings = new class {
             public $values = [];
 
@@ -187,16 +189,16 @@ class ModuleTest extends TestCase
     /**
      * @dataProvider unusableEnvironmentUrls
      */
-    public function testUnusableCustomEnvironmentUrlRejectsTheWholeSubmission(string $url): void
+    public function testUnusableCustomEnvironmentUrlSavesTheRestAndWarns(string $url): void
     {
-        $this->settings->values['threedviewer_model_viewer_environment'] = 'neutral';
-        $result = $this->submit(['threedviewer_viewer_height' => 500, 'threedviewer_foreground_color' => '#000000',
+        $this->submit(['threedviewer_viewer_height' => 640, 'threedviewer_foreground_color' => '#000000',
             'threedviewer_background_color' => '#ffffff',
             'threedviewer_model_viewer_environment' => 'custom',
             'threedviewer_model_viewer_environment_url' => $url]);
-        $this->assertFalse($result, 'Omeka shows the form again with an error');
-        $saved = ['threedviewer_model_viewer_environment' => 'neutral'];
-        $this->assertSame($saved, $this->settings->values, 'Nothing is saved');
+        $this->assertSame(640, $this->settings->values['threedviewer_viewer_height'], 'The other edits are kept');
+        $this->assertSame('default', $this->settings->values['threedviewer_model_viewer_environment']);
+        $this->assertSame('', $this->settings->values['threedviewer_model_viewer_environment_url']);
+        $this->assertCount(1, Messenger::$warnings);
     }
 
     public function unusableEnvironmentUrls(): array
@@ -205,18 +207,39 @@ class ModuleTest extends TestCase
             'empty' => [''],
             'no scheme' => ['example.com/studio.hdr'],
             'space' => ['https://x/a b.hdr'],
+            'javascript' => ['javascript:alert(1)'],
         ];
     }
 
-    public function testUsableCustomEnvironmentUrlIsSaved(): void
+    /**
+     * @dataProvider hiddenEnvironmentSubmissions
+     */
+    public function testNoWarningForAnEnvironmentFieldTheAdminCannotSee(array $post): void
     {
-        $result = $this->submit(['threedviewer_viewer_height' => 500, 'threedviewer_foreground_color' => '#000000',
+        $this->submit($post + ['threedviewer_viewer_height' => 500, 'threedviewer_foreground_color' => '#000000',
             'threedviewer_background_color' => '#ffffff',
             'threedviewer_model_viewer_environment' => 'custom',
-            'threedviewer_model_viewer_environment_url' => '/files/studio.hdr']);
-        $this->assertNotFalse($result);
+            'threedviewer_model_viewer_environment_url' => '']);
+        $this->assertSame([], Messenger::$warnings);
+    }
+
+    public function hiddenEnvironmentSubmissions(): array
+    {
+        return [
+            'custom lights' => [['threedviewer_lights' => 'custom']],
+            'Babylon.js library' => [['threedviewer_default_library' => 'babylon']],
+        ];
+    }
+
+    public function testUsableCustomEnvironmentUrlIsSavedWithoutWarning(): void
+    {
+        $this->submit(['threedviewer_viewer_height' => 500, 'threedviewer_foreground_color' => '#000000',
+            'threedviewer_background_color' => '#ffffff',
+            'threedviewer_model_viewer_environment' => 'custom',
+            'threedviewer_model_viewer_environment_url' => ' /files/studio.hdr ']);
         $this->assertSame('custom', $this->settings->values['threedviewer_model_viewer_environment']);
         $this->assertSame('/files/studio.hdr', $this->settings->values['threedviewer_model_viewer_environment_url']);
+        $this->assertSame([], Messenger::$warnings);
     }
 
     /**
@@ -242,6 +265,8 @@ class ModuleTest extends TestCase
             'no scheme' => ['example.com/studio.hdr', false],
             'space' => ['https://x/a b.hdr', false],
             'protocol-relative' => ['//evil.example/x.hdr', false],
+            'javascript' => ['javascript:alert(1)', false],
+            'surrounding spaces are trimmed, as in the module form' => [' /files/studio.hdr ', true],
         ];
     }
 
@@ -427,10 +452,7 @@ class ModuleTest extends TestCase
         }
     }
 
-    /**
-     * @return mixed What handleConfigForm returns
-     */
-    private function submit(array $post)
+    private function submit(array $post): void
     {
         $controller = $this->getMockBuilder(AbstractController::class)
             ->disableOriginalConstructor()->onlyMethods(['params'])->getMock();
@@ -448,7 +470,7 @@ class ModuleTest extends TestCase
             }
         };
         $controller->method('params')->willReturn($params);
-        return $this->module->handleConfigForm($controller);
+        $this->module->handleConfigForm($controller);
     }
 
     public function testBothSettingsFormsLoadTheShowIfScript(): void

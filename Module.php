@@ -20,6 +20,9 @@ use ThreeDViewer\Settings\Lighting;
  */
 class Module extends AbstractModule
 {
+    private const ENVIRONMENT_URL_ERROR =
+        'The custom environment image URL must start with http://, https:// or /.'; // @translate
+
     /**
      * Retrieve the configuration array.
      *
@@ -144,15 +147,13 @@ class Module extends AbstractModule
         foreach (Lighting::keys() as $name) {
             $inputFilter->add(['name' => $name, 'required' => false, 'allow_empty' => true]);
         }
-        $inputFilter->get('threedviewer_model_viewer_environment_url')->getValidatorChain()->attach(
-            new \Laminas\Validator\Regex([
-                'pattern' => Lighting::URL_PATTERN,
-                'messages' => [
-                    \Laminas\Validator\Regex::NOT_MATCH =>
-                        'The custom environment image URL must start with http://, https:// or /.', // @translate
-                ],
-            ])
-        );
+        // Trimmed first, as Lighting::clean() does
+        $url = $inputFilter->get('threedviewer_model_viewer_environment_url');
+        $url->getFilterChain()->attach(new \Laminas\Filter\StringTrim());
+        $url->getValidatorChain()->attach(new \Laminas\Validator\Regex([
+            'pattern' => Lighting::URL_PATTERN,
+            'messages' => [\Laminas\Validator\Regex::NOT_MATCH => self::ENVIRONMENT_URL_ERROR],
+        ]));
     }
 
     /**
@@ -257,17 +258,6 @@ class Module extends AbstractModule
         
         $config = $controller->params()->fromPost();
         
-        // normalise() would drop a custom environment without a usable URL: refuse instead, saving nothing
-        $lighting = Lighting::normalise($config);
-        if (($config['threedviewer_model_viewer_environment'] ?? '') === 'custom'
-            && $lighting['threedviewer_model_viewer_environment'] !== 'custom'
-        ) {
-            (new Messenger())->addError(new Message(
-                'The custom environment image URL must start with http://, https:// or /.' // @translate
-            ));
-            return false;
-        }
-
         $settings->set('threedviewer_default_library', $config['threedviewer_default_library'] ?? 'model-viewer');
         $settings->set('threedviewer_viewer_height', $config['threedviewer_viewer_height']);
         $settings->set(
@@ -282,8 +272,17 @@ class Module extends AbstractModule
             isset($config['threedviewer_show_grid'])
                 && $config['threedviewer_show_grid'] === '1'
         );
+        $lighting = Lighting::normalise($config);
         foreach ($lighting as $key => $value) {
             $settings->set($key, $value);
+        }
+        // normalise() drops a custom environment without a usable URL: say so, when the admin could see it
+        if (($config['threedviewer_model_viewer_environment'] ?? '') === 'custom'
+            && $lighting['threedviewer_model_viewer_environment'] !== 'custom'
+            && $lighting['threedviewer_lights'] === 'default'
+            && ($config['threedviewer_default_library'] ?? 'model-viewer') === 'model-viewer'
+        ) {
+            (new Messenger())->addWarning(new Message(self::ENVIRONMENT_URL_ERROR));
         }
         $stlUpAxis = $config['threedviewer_stl_up_axis'] ?? '';
         $settings->set('threedviewer_stl_up_axis', in_array($stlUpAxis, ['y', 'z'], true) ? $stlUpAxis : 'current');
