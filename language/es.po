@@ -490,3 +490,7 @@ msgstr "Iluminación de Babylon.js del visor 3D"
 
 #~ msgid "Choose the default lighting rig for Babylon.js scenes."
 #~ msgstr "Elija la iluminación predeterminada para las escenas de Babylon.js."
+
+#: Module.php
+msgid "Invalid custom environment image URL: the default environment is used."
+msgstr "URL de imagen de entorno personalizada no válida: se usa el entorno por defecto."

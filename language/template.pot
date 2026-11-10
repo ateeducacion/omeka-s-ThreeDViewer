@@ -470,3 +470,7 @@ msgstr ""
 #: Module.php:109
 msgid "3D viewer Babylon.js lighting"
 msgstr ""
+
+#: Module.php
+msgid "Invalid custom environment image URL: the default environment is used."
+msgstr ""

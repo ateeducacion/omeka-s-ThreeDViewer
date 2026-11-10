@@ -262,8 +262,17 @@ class Module extends AbstractModule
             isset($config['threedviewer_show_grid'])
                 && $config['threedviewer_show_grid'] === '1'
         );
-        foreach (Lighting::normalise($config) as $key => $value) {
+        $lighting = Lighting::normalise($config);
+        foreach ($lighting as $key => $value) {
             $settings->set($key, $value);
+        }
+        // normalise() drops a custom environment without a usable URL: tell the admin why
+        if (($config['threedviewer_model_viewer_environment'] ?? '') === 'custom'
+            && $lighting['threedviewer_model_viewer_environment'] !== 'custom'
+        ) {
+            (new Messenger())->addWarning(new Message(
+                'Invalid custom environment image URL: the default environment is used.' // @translate
+            ));
         }
         $stlUpAxis = $config['threedviewer_stl_up_axis'] ?? '';
         $settings->set('threedviewer_stl_up_axis', in_array($stlUpAxis, ['y', 'z'], true) ? $stlUpAxis : 'current');

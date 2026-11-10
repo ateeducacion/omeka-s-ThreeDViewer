@@ -184,6 +184,40 @@ class ModuleTest extends TestCase
         $this->assertSame($expected, $this->settings->values['threedviewer_lighting_mode']);
     }
 
+    /**
+     * @dataProvider unusableEnvironmentUrls
+     */
+    public function testUnusableCustomEnvironmentUrlWarnsTheAdmin(string $url): void
+    {
+        \Omeka\Mvc\Controller\Plugin\Messenger::$warnings = [];
+        $this->submit(['threedviewer_viewer_height' => 500, 'threedviewer_foreground_color' => '#000000',
+            'threedviewer_background_color' => '#ffffff',
+            'threedviewer_model_viewer_environment' => 'custom',
+            'threedviewer_model_viewer_environment_url' => $url]);
+        $this->assertSame('default', $this->settings->values['threedviewer_model_viewer_environment']);
+        $this->assertCount(1, \Omeka\Mvc\Controller\Plugin\Messenger::$warnings);
+    }
+
+    public function unusableEnvironmentUrls(): array
+    {
+        return [
+            'empty' => [''],
+            'no scheme' => ['example.com/studio.hdr'],
+            'space' => ['https://x/a b.hdr'],
+        ];
+    }
+
+    public function testUsableCustomEnvironmentUrlDoesNotWarn(): void
+    {
+        \Omeka\Mvc\Controller\Plugin\Messenger::$warnings = [];
+        $this->submit(['threedviewer_viewer_height' => 500, 'threedviewer_foreground_color' => '#000000',
+            'threedviewer_background_color' => '#ffffff',
+            'threedviewer_model_viewer_environment' => 'custom',
+            'threedviewer_model_viewer_environment_url' => 'https://example.com/studio.hdr']);
+        $this->assertSame('custom', $this->settings->values['threedviewer_model_viewer_environment']);
+        $this->assertSame([], \Omeka\Mvc\Controller\Plugin\Messenger::$warnings);
+    }
+
     public function lightingModeSubmissions(): array
     {
         return [
