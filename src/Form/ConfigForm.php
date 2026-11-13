@@ -179,7 +179,7 @@ class ConfigForm extends Form
                 'value_options' => [
                     'none' => 'None', // @translate
                     'default' => 'Default environment', // @translate
-                    'studio' => 'Studio with ground shadow', // @translate
+                    'studio' => 'Studio', // @translate
                 ],
             ],
         ]);

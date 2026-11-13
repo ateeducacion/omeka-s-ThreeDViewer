@@ -55,6 +55,17 @@ class ConfigFormTest extends TestCase
         );
     }
 
+    public function testBabylonEnvironmentsPromiseNoShadowTheyDoNotDraw(): void
+    {
+        $this->form->init();
+
+        // No light casts a shadow in Babylon.js, so "studio" only differs by its ground (#57).
+        $this->assertSame(
+            ['none' => 'None', 'default' => 'Default environment', 'studio' => 'Studio'],
+            $this->form->get('threedviewer_babylon_environment')->getValueOptions()
+        );
+    }
+
     public function testEachLightingNumberFieldTakesItsRangeAndStepFromLighting(): void
     {
         $this->form->init();

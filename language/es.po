@@ -311,8 +311,8 @@ msgid "Default environment"
 msgstr "Entorno predeterminado"
 
 #: src/Form/ConfigForm.php:182
-msgid "Studio with ground shadow"
-msgstr "Estudio con sombra en el suelo"
+msgid "Studio"
+msgstr "Estudio"
 
 #: src/Form/ConfigForm.php:191
 msgid "Enable WebXR (VR/AR) when available"

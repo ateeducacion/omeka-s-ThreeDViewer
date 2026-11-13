@@ -306,7 +306,7 @@ msgid "Default environment"
 msgstr ""
 
 #: src/Form/ConfigForm.php:182
-msgid "Studio with ground shadow"
+msgid "Studio"
 msgstr ""
 
 #: src/Form/ConfigForm.php:191
