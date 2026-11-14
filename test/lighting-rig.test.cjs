@@ -472,14 +472,29 @@ test('Babylon.js rig: lights scaled by pi for PBR materials only, as standard ma
  * Euler (r120, which names invert() inverse()), with model-viewer's own environment, its camera
  * starting at `start`. turn() is the environment's turn now, as a quaternion.
  */
-function modelViewerHarness(start, autoRotate = true) {
+function modelViewerHarness(start, autoRotate = true, options = {}) {
     const three = { window: {}, self: {}, console };
     three.self = three.window;
     runInNewContext(readFileSync(join(__dirname, '../asset/vendor/three/three.min.js'), 'utf8'), three);
     const THREE = three.window.THREE || three.THREE;
     THREE.Quaternion.prototype.invert = THREE.Quaternion.prototype.inverse;
+    // model-viewer's shadow, as it handles it: through the scene, 0.5 x the element's shadowIntensity, with
+    // any shadow baked into the model shown at 0
+    const baked = { visible: false };
     const scene = { environmentRotation: new THREE.Euler(), quaternion: new THREE.Quaternion(),
-        position: new THREE.Vector3(), queueRender() {} };
+        position: new THREE.Vector3(), queueRender() {},
+        shadow: null, shadowIntensity: 0,
+        setShadowIntensity(t) {
+            this.shadowIntensity = t;
+            baked.visible = t <= 0;
+            if (t > 0 && !this.shadow) {
+                this.shadow = { intensity: 0, setIntensity(v) { this.intensity = v; } };
+            }
+            if (this.shadow) {
+                this.shadow.setIntensity(t);
+            }
+        } };
+    scene.setShadowIntensity(0.3);
     const listeners = {};
     const frames = [];
     const events = [];
@@ -487,9 +502,9 @@ function modelViewerHarness(start, autoRotate = true) {
     const viewer = {
         turntableRotation: 0,
         autoRotate,
-        dataset: { lightingMode: 'model', lightingControls: 'true' },
+        dataset: Object.assign({ lightingMode: 'model', lightingControls: 'true' }, options.dataset),
         style: { setProperty() {} },
-        exposure: 1,
+        exposure: options.exposure === undefined ? 1 : options.exposure,
         loaded: true,
         getCameraOrbit: () => ({ theta: camera.theta * Math.PI / 180, phi: camera.phi * Math.PI / 180 }),
         registerEffectComposer: (composer) => composer.setMainScene(scene),
@@ -501,7 +516,8 @@ function modelViewerHarness(start, autoRotate = true) {
     class CustomEvent { constructor(type, init) { this.type = type; this.detail = init.detail; } }
     const window = { customElements: { whenDefined: () => ({ then: (go) => go() }) } };
     const context = { window, console, CustomEvent, customElements: window.customElements,
-        requestAnimationFrame: (f) => frames.push(f),
+        requestAnimationFrame: (f) => frames.push(f), setTimeout, clearTimeout, Blob: class {},
+        URL: { createObjectURL: () => 'blob:rig', revokeObjectURL() {} },
         document: { readyState: 'complete', querySelectorAll: () => [viewer] } };
     runInNewContext(source, context);
     runInNewContext(readFileSync(join(__dirname, '../asset/js/model-viewer-lighting.js'), 'utf8'), context);
@@ -514,7 +530,7 @@ function modelViewerHarness(start, autoRotate = true) {
         viewer.turntableRotation = degrees * Math.PI / 180;
         frames.splice(0).forEach((f) => f());
     };
-    return { THREE, listeners, turn, events, spin, frames, move: (to) => { camera = to; } };
+    return { THREE, listeners, turn, events, spin, frames, scene, baked, move: (to) => { camera = to; } };
 }
 
 test('model-viewer: without auto-rotate, nothing watches the turntable every frame', () => {
@@ -697,29 +713,93 @@ test('model-viewer: with the panel open, the directions shown follow the model r
     assert.equal(turned.detail.lights[0].elevation, 30);
 });
 
-test('litFromAbove: a light with some strength pointing upwards, not level and not below', () => {
+test('shadowShown: unless lights shine and none from above', () => {
     const front = { x: 0, z: 1 };
     const light = (elevation, strength = 1) => ({ strength, direction: lighting.direction(30, elevation, front, false) });
-    assert.equal(lighting.litFromAbove([light(45)]), true);
-    assert.equal(lighting.litFromAbove([light(-30), light(-60)]), false, 'every light below');
-    assert.equal(lighting.litFromAbove([light(0), light(-10)]), false, 'level does not count');
-    assert.equal(lighting.litFromAbove([light(1)]), true, 'just above');
-    assert.equal(lighting.litFromAbove([light(60, 0), light(-20)]), false, 'the light above has no strength');
-    assert.equal(lighting.litFromAbove([light(-30), light(10)]), true, 'one of two above');
-    assert.equal(lighting.litFromAbove([{ strength: 1 }, light(-30)]), false, 'the ambient light has no direction');
-    assert.equal(lighting.litFromAbove([]), false);
+    assert.equal(lighting.shadowShown([light(45)]), true);
+    assert.equal(lighting.shadowShown([light(-30), light(-60)]), false, 'every light below');
+    assert.equal(lighting.shadowShown([light(0), light(-10)]), false, 'level does not count as above');
+    assert.equal(lighting.shadowShown([light(1)]), true, 'just above');
+    assert.equal(lighting.shadowShown([light(60, 0), light(-20)]), false, 'the light above has no strength');
+    assert.equal(lighting.shadowShown([light(-30), light(10)]), true, 'one of two above');
+    assert.equal(lighting.shadowShown([{ strength: 1 }, light(-30)]), false, 'the ambient light counts neither way');
+    assert.equal(lighting.shadowShown([{ strength: 1 }, light(-30, 0)]), true, 'none shining: ambient only');
+    assert.equal(lighting.shadowShown([]), true);
 });
 
-test('litFromAbove: once turned, a light above can end up below and one below above', () => {
+test('shadowShown: once turned, a light above can end up below and one below above', () => {
     // A light 20 degrees up, in front, seen from a camera tipped 50 degrees to look down: turned the same
     // way, it now points below level. The other way round, a light 30 degrees below rises above.
     const front = { x: 0, z: 1 };
-    const tip = (v, degrees) => {
+    const tip = (degrees) => (v) => {
         const a = degrees * Math.PI / 180;
-        return { x: v.x, y: v.y * Math.cos(a) - v.z * Math.sin(a), z: v.y * Math.sin(a) + v.z * Math.cos(a) };
+        return v.y * Math.cos(a) - v.z * Math.sin(a);
     };
-    const up = lighting.direction(0, 20, front, false);
-    const down = lighting.direction(0, -30, front, false);
-    assert.equal(lighting.litFromAbove([{ strength: 1, direction: tip(up, 50) }]), false);
-    assert.equal(lighting.litFromAbove([{ strength: 1, direction: tip(down, -50) }]), true);
+    const up = { strength: 1, direction: lighting.direction(0, 20, front, false) };
+    const down = { strength: 1, direction: lighting.direction(0, -30, front, false) };
+    assert.equal(lighting.shadowShown([up], tip(50)), false);
+    assert.equal(lighting.shadowShown([down], tip(-50)), true);
+});
+
+/** A rig for data-lights: ambient, and one light per [azimuth, elevation, strength] */
+const rigData = (...lights) => JSON.stringify({
+    ambient: { color: '#ffffff', strength: 0.3 },
+    lights: lights.map(([azimuth, elevation, strength = 1]) => ({ color: '#ffffff', strength, azimuth, elevation }))
+});
+
+test('model-viewer: the shadow is hidden while every light is below, without showing a baked shadow', () => {
+    const { scene, baked, listeners } = modelViewerHarness({ theta: 0, phi: 75 }, false,
+        { dataset: { lights: rigData([30, -30], [-60, -60]) } });
+    assert.equal(scene.shadow.intensity, 0, 'the shadow is hidden');
+    assert.equal(baked.visible, false, 'a shadow baked into the model stays hidden');
+    assert.equal(scene.shadowIntensity, 0.3, 'its strength as configured');
+
+    // model-viewer sets the strength again as a model loads, and as AR starts and ends
+    scene.setShadowIntensity(0.3);
+    assert.equal(scene.shadow.intensity, 0, 'still hidden');
+
+    // The lighting controls raise a light above the model
+    listeners['threedviewer:lighting']({ detail: { mode: 'model', lights: [
+        { id: 'light1', azimuth: 30, elevation: 40 }
+    ] } });
+    assert.equal(scene.shadow.intensity, 0.3, 'shown again as configured');
+    assert.equal(baked.visible, false);
+});
+
+test('model-viewer: with a light above, the shadow is left as configured', () => {
+    const { scene } = modelViewerHarness({ theta: 0, phi: 75 }, false,
+        { dataset: { lights: rigData([30, -30], [-60, 45]) } });
+    assert.equal(scene.shadow.intensity, 0.3);
+});
+
+test('model-viewer: fixed to the viewer, looking down drops a light behind the model below it', () => {
+    const { scene, listeners, move } = modelViewerHarness({ theta: 0, phi: 75 }, false,
+        { dataset: { lights: rigData([180, 20]), lightingMode: 'viewer' } });
+    assert.equal(scene.shadow.intensity, 0.3, '20 degrees up in the default view');
+    move({ theta: 0, phi: 30 });
+    listeners['camera-change']();
+    assert.equal(scene.shadow.intensity, 0, 'turned 45 degrees down with the camera');
+    move({ theta: 0, phi: 90 });
+    listeners['camera-change']();
+    assert.equal(scene.shadow.intensity, 0.3, 'and up again');
+});
+
+test('model-viewer: at brightness 0 no light shines, so the shadow stays, with or without the controls', () => {
+    for (const lightingControls of ['true', 'false']) {
+        const { scene } = modelViewerHarness({ theta: 0, phi: 75 }, false,
+            { exposure: 0, dataset: { lights: rigData([30, -30]), lightingControls } });
+        assert.equal(scene.shadow.intensity, 0.3, `controls ${lightingControls}`);
+    }
+});
+
+test('model-viewer: its own environment moved below the model by the controls hides the shadow', () => {
+    const { scene, listeners } = modelViewerHarness({ theta: 0, phi: 75 }, false);
+    assert.equal(scene.shadow.intensity, 0.3, 'overhead to start with');
+    const environment = (elevation) => listeners['threedviewer:lighting']({ detail: { mode: 'model', lights: [
+        { id: 'environment', kind: 'environment', strength: 1, azimuth: 0, elevation }
+    ] } });
+    environment(-20);
+    assert.equal(scene.shadow.intensity, 0);
+    environment(10);
+    assert.equal(scene.shadow.intensity, 0.3);
 });

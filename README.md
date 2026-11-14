@@ -66,9 +66,10 @@ See general end user documentation for [Installing a module](http://omeka.org/s/
      model-viewer has no lamps, so there the rig is painted into the environment image that lights the model.
    - **model-viewer environment** (with *Viewer default*): model-viewer's own, `neutral`, `legacy`, or an image URL.
    - **model-viewer shadow strength** and **softness** (with either *Lights* setting): the shadow under GLB/glTF
-     models. A strength of 0 shows none. model-viewer draws it whatever the lights, so with a custom rig it is left
-     out while no light shines from above the model: while every light is below or level with it, including once
-     the camera has turned lights fixed to the viewer, or the lighting controls have moved them.
+     models. A strength of 0 shows none. model-viewer draws it whatever the lights, so it is hidden while lights
+     shine on the model but none from above: while every light in use is below or level with it, including once the
+     camera has turned lights fixed to the viewer, or the lighting controls have moved them (with *Viewer default*,
+     model-viewer's own light). With no light shining, such as with only the ambient light, the shadow stays.
    Settings that don't apply are hidden: the light rig until *Lights* is *Custom*, each light beyond *Number of
    lights*, the custom environment URL until *Custom image* is chosen, and the model-viewer or Babylon.js settings
    while the other library is selected (in a site's settings, the module's library). The settings after the general

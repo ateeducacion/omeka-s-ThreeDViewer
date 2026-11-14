@@ -27,27 +27,72 @@
   const ENVIRONMENT_POLL = 250;
 
   /**
-   * The shadow strength configured for a viewer: from data-shadow-intensity where GlbRenderer left
-   * the shadow out, as no light was above the model, or else from shadow-intensity; 0 for none.
+   * A switch for model-viewer's shadow under the model, which it draws whatever the lights: called
+   * with false, it hides the shadow, and with true shows it again as configured. Null where this
+   * model-viewer's scene has no shadow to reach.
+   *
+   * The shadow is hidden in the scene rather than by setting shadowIntensity to 0, at which
+   * model-viewer shows any shadow baked into the model instead. model-viewer sets the shadow's
+   * strength again as a model loads, as AR starts and ends, and as shadowIntensity changes, all
+   * through the scene's setShadowIntensity(), so a hidden shadow is hidden again each time.
    */
-  function configuredShadow(viewer) {
-    const value = Number(viewer.dataset.shadowIntensity !== undefined
-      ? viewer.dataset.shadowIntensity
-      : viewer.getAttribute('shadow-intensity'));
-    return isFinite(value) && value > 0 ? value : 0;
+  function shadowSwitch(scene) {
+    if (!scene || typeof scene.setShadowIntensity !== 'function') {
+      return null;
+    }
+    let shown = true;
+    const setShadowIntensity = scene.setShadowIntensity;
+    function hide() {
+      if (!shown && scene.shadow && typeof scene.shadow.setIntensity === 'function') {
+        scene.shadow.setIntensity(0);
+      }
+    }
+    scene.setShadowIntensity = function () {
+      setShadowIntensity.apply(this, arguments);
+      hide();
+    };
+    return function (show) {
+      if (show === shown) {
+        return;
+      }
+      shown = show;
+      if (show) {
+        scene.setShadowIntensity(scene.shadowIntensity);
+      } else {
+        hide();
+      }
+      if (typeof scene.queueRender === 'function') {
+        scene.queueRender();
+      }
+    };
   }
 
   /**
-   * Show the configured shadow while any light shines from above the model, and none otherwise:
-   * model-viewer draws its shadow whatever the lights.
+   * Whether the shadow should show for these lights, as lighting-rig.js's shadowShown() decides: with
+   * no exposure, no light shines.
    *
-   * @param {Object[]} lights - { strength, direction }, the directions in the scene, y up
+   * @param {Function} [height] - As for shadowShown()
    */
-  function showShadow(viewer, shadow, lights) {
-    const intensity = window.ThreeDViewerLighting.litFromAbove(lights) ? shadow : 0;
-    if (viewer.shadowIntensity !== intensity) {
-      viewer.shadowIntensity = intensity;
-    }
+  function shadowShown(viewer, lights, height) {
+    return viewer.exposure <= 0 || window.ThreeDViewerLighting.shadowShown(lights, height);
+  }
+
+  /**
+   * The lights of a rig, for the controller, their directions from the side the default view looks
+   * from
+   */
+  function rigLights(rig, side) {
+    const lighting = window.ThreeDViewerLighting;
+    return [{ id: 'ambient', kind: 'ambient', color: rig.ambient.color, strength: rig.ambient.strength }]
+      .concat(rig.lights.map(function (light, i) {
+        return {
+          id: 'light' + (i + 1),
+          kind: 'light',
+          color: light.color,
+          strength: light.strength,
+          direction: lighting.direction(light.azimuth, light.elevation, side, false)
+        };
+      }));
   }
 
   /**
@@ -241,12 +286,12 @@
    * the model, the lights turn with it; fixed to the viewer, the frame turns back as the model turns,
    * and the lights stay put. The turntable is watched each frame, as nothing announces its turns.
    *
-   * With a rig and a shadow, the shadow is shown only while a light, turned by the frame, shines from
-   * above the model. The model's turn is about the vertical, so it raises or lowers no light.
+   * The shadow is hidden while lights shine but none, turned by the frame, from above the model (see
+   * shadowShown()). The model's turn is about the vertical, so it raises or lowers no light.
    *
    * @param {Object|null} rig - The rig as painted, its strengths already multiplied by brightness
    * @param {{x: number, z: number}} side - The side of the model the default view looks from
-   * @param {number} shadow - The configured shadow strength, 0 for none
+   * @param {?function(boolean)} shadow - From shadowSwitch()
    */
   function setUpLighting(viewer, rig, side, shadow) {
     const lighting = window.ThreeDViewerLighting;
@@ -269,16 +314,7 @@
 
     let lights;
     if (rig) {
-      lights = [{ id: 'ambient', kind: 'ambient', color: rig.ambient.color, strength: rig.ambient.strength }]
-        .concat(rig.lights.map(function (light, i) {
-          return {
-            id: 'light' + (i + 1),
-            kind: 'light',
-            color: light.color,
-            strength: light.strength,
-            direction: lighting.direction(light.azimuth, light.elevation, side, false)
-          };
-        }));
+      lights = rigLights(rig, side);
       // Each repaint loads a new environment; without this, the loading bar flashes as a slider moves
       viewer.style.setProperty('--progress-bar-height', '0px');
     } else {
@@ -396,12 +432,10 @@
         }
         changed = false;
         orient(all, frame);
-        if (rig && shadow) {
-          showShadow(viewer, shadow, all.map(function (light) {
-            const d = light.direction;
-            const turned = d && frame ? new Vector3(d.x, d.y, d.z).applyQuaternion(frame) : d;
-            return { strength: light.strength, direction: turned };
-          }));
+        if (shadow) {
+          shadow(shadowShown(viewer, all, frame ? function (d) {
+            return heightTurned(frame, d);
+          } : null));
         }
       }
     });
@@ -427,6 +461,18 @@
     }
   }
 
+  /**
+   * The y of a direction turned by a quaternion, without making a vector: place() runs every frame
+   * while auto-rotate turns lights fixed to the viewer
+   */
+  function heightTurned(q, d) {
+    // v + 2w (q × v) + 2 q × (q × v), for the unit quaternion q
+    const cx = q.y * d.z - q.z * d.y;
+    const cy = q.z * d.x - q.x * d.z;
+    const cz = q.x * d.y - q.y * d.x;
+    return d.y + 2 * (q.w * cy + q.z * cx - q.x * cz);
+  }
+
   function attach(viewer) {
     if (viewer.dataset.lightingAttached) {
       return;
@@ -447,22 +493,17 @@
       viewer.exposure = 1;
     }
     const side = viewSide(viewer);
-    const shadow = rig ? configuredShadow(viewer) : 0;
     if (rig) {
       applyRig(viewer, rig, side);
-      if (shadow) {
-        // As GlbRenderer decided for the default view, until the lighting is set up
-        showShadow(viewer, shadow, rig.lights.map(function (light) {
-          return {
-            strength: light.strength,
-            direction: lighting.direction(light.azimuth, light.elevation, side, false)
-          };
-        }));
-      }
     }
 
     // A rig also needs turning with the model, as auto-rotate turns it
     if (lighting && (controls || rig || viewer.dataset.lightingMode === 'viewer')) {
+      // Decided for the default view before the model loads, so no frame shows a shadow to be hidden
+      const shadow = shadowSwitch(getScene(viewer));
+      if (shadow && rig) {
+        shadow(shadowShown(viewer, rigLights(rig, side)));
+      }
       if (viewer.loaded) {
         setUpLighting(viewer, rig, side, shadow);
       } else {
