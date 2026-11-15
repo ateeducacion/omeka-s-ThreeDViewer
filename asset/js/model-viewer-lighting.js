@@ -39,6 +39,10 @@
    * Showing it again reads the scene's shadowIntensity and hiding it calls the shadow's
    * setIntensity(), so without both the switch would hide the shadow for good. model-viewer makes the
    * shadow only once a model shows one, so it is checked here only if made already.
+   *
+   * At strength 0 model-viewer makes no shadow and shows the shadows baked into the model instead,
+   * through the scene's setBakedShadowVisibility(), which it calls again as it frames the model. While
+   * hidden, that hides them too; where the scene has no such method, they are left as model-viewer has them.
    */
   function shadowSwitch(scene) {
     if (!scene || typeof scene.setShadowIntensity !== 'function' || typeof scene.shadowIntensity !== 'number'
@@ -56,6 +60,13 @@
       setShadowIntensity.apply(this, arguments);
       hide();
     };
+    const setBakedShadowVisibility = typeof scene.setBakedShadowVisibility === 'function'
+      ? scene.setBakedShadowVisibility : null;
+    if (setBakedShadowVisibility) {
+      scene.setBakedShadowVisibility = function () {
+        setBakedShadowVisibility.apply(this, shown ? arguments : [false]);
+      };
+    }
     return function (show) {
       if (show === shown) {
         return;
@@ -65,6 +76,9 @@
         scene.setShadowIntensity(scene.shadowIntensity);
       } else {
         hide();
+      }
+      if (setBakedShadowVisibility) {
+        scene.setBakedShadowVisibility();
       }
       if (typeof scene.queueRender === 'function') {
         scene.queueRender();
