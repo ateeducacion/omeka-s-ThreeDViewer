@@ -536,7 +536,10 @@ function modelViewerHarness(start, autoRotate = true, options = {}) {
                 this.shadow.setIntensity(t);
             }
         } };
-    scene.setShadowIntensity(0.3);
+    // Unloaded, model-viewer creates the shadow only as the model loads
+    if (!options.unloaded) {
+        scene.setShadowIntensity(0.3);
+    }
     const listeners = {};
     const frames = [];
     const events = [];
@@ -547,7 +550,7 @@ function modelViewerHarness(start, autoRotate = true, options = {}) {
         dataset: Object.assign({ lightingMode: 'model', lightingControls: 'true' }, options.dataset),
         style: { setProperty() {} },
         exposure: options.exposure === undefined ? 1 : options.exposure,
-        loaded: true,
+        loaded: !options.unloaded,
         getCameraOrbit: () => ({ theta: camera.theta * Math.PI / 180, phi: camera.phi * Math.PI / 180 }),
         registerEffectComposer: (composer) => composer.setMainScene(scene),
         unregisterEffectComposer() {},
@@ -806,6 +809,19 @@ test('model-viewer: the shadow is hidden while every light is below, without sho
     ] } });
     assert.equal(scene.shadow.intensity, 0.3, 'shown again as configured');
     assert.equal(baked.visible, false);
+});
+
+test('model-viewer: before the model loads, the shadow is hidden as soon as it exists', () => {
+    const { scene, baked, listeners } = modelViewerHarness({ theta: 0, phi: 75 }, false,
+        { unloaded: true, dataset: { lights: rigData([30, -30], [-60, -60]) } });
+    assert.equal(scene.shadow, null, 'no shadow yet');
+
+    // model-viewer creates its shadow as the model loads, before its load event
+    scene.setShadowIntensity(0.3);
+    assert.equal(scene.shadow.intensity, 0, 'hidden from its first frame');
+    assert.equal(baked.visible, false);
+    listeners.load();
+    assert.equal(scene.shadow.intensity, 0, 'still hidden once loaded');
 });
 
 test('model-viewer: with a light above, the shadow is left as configured', () => {
