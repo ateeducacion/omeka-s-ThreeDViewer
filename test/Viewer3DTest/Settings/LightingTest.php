@@ -84,7 +84,7 @@ class LightingTest extends TestCase
             'unknown environment' => ['threedviewer_model_viewer_environment', 'studio', 'default'],
             'babylon point' => ['threedviewer_babylon_lighting', 'point', 'point'],
             'unknown babylon lighting' => ['threedviewer_babylon_lighting', 'spot', 'hemispheric'],
-            'babylon studio' => ['threedviewer_babylon_environment', 'studio', 'studio'],
+            'retired babylon studio (#57)' => ['threedviewer_babylon_environment', 'studio', 'default'],
             'unknown babylon environment' => ['threedviewer_babylon_environment', 'sky', 'none'],
         ];
     }

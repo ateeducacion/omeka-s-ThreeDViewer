@@ -55,6 +55,17 @@ class ConfigFormTest extends TestCase
         );
     }
 
+    public function testBabylonEnvironmentsOfferNoDuplicateStudio(): void
+    {
+        $this->form->init();
+
+        // "Studio with ground shadow" drew the same scene as the default environment (#57)
+        $this->assertSame(
+            ['none', 'default'],
+            array_keys($this->form->get('threedviewer_babylon_environment')->getValueOptions())
+        );
+    }
+
     public function testEachLightingNumberFieldTakesItsRangeAndStepFromLighting(): void
     {
         $this->form->init();

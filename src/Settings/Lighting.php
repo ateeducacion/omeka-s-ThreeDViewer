@@ -22,7 +22,13 @@ class Lighting
         'threedviewer_lights' => ['default', 'custom'],
         'threedviewer_model_viewer_environment' => ['default', 'neutral', 'legacy', 'custom'],
         'threedviewer_babylon_lighting' => ['hemispheric', 'directional', 'point', 'environment'],
-        'threedviewer_babylon_environment' => ['none', 'default', 'studio'],
+        'threedviewer_babylon_environment' => ['none', 'default'],
+    ];
+
+    /** Retired values, read as the option that draws the same thing */
+    private const RENAMED = [
+        // "Studio with ground shadow" drew the default environment: nothing casts a shadow (#57)
+        'threedviewer_babylon_environment' => ['studio' => 'default'],
     ];
 
     /**
@@ -267,6 +273,7 @@ class Lighting
         $default = self::defaults()[$key];
 
         if (isset(self::OPTIONS[$key])) {
+            $value = is_string($value) ? (self::RENAMED[$key][$value] ?? $value) : $value;
             return in_array($value, self::OPTIONS[$key], true) ? $value : $default;
         }
 

@@ -91,7 +91,7 @@ class BabylonRendererTest extends TestCase
             'threedviewer_auto_rotate' => false,
             'threedviewer_babylon_camera' => 'universal',
             'threedviewer_babylon_lighting' => 'directional',
-            'threedviewer_babylon_environment' => 'studio',
+            'threedviewer_babylon_environment' => 'default',
             'threedviewer_babylon_enable_xr' => true,
             'threedviewer_show_grid' => true,
             'threedviewer_babylon_show_toolbar' => true,
@@ -110,7 +110,7 @@ class BabylonRendererTest extends TestCase
         $this->assertStringContainsString('data-auto-rotate="false"', $html);
         $this->assertStringContainsString('data-camera="universal"', $html);
         $this->assertStringContainsString('data-lighting="directional"', $html);
-        $this->assertStringContainsString('data-environment="studio"', $html);
+        $this->assertStringContainsString('data-environment="default"', $html);
         $this->assertStringContainsString('data-enable-xr="true"', $html);
         $this->assertStringContainsString('data-show-grid="true"', $html);
         $this->assertStringContainsString('data-show-inspector="true"', $html);
