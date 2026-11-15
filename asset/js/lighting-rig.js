@@ -172,6 +172,31 @@
         return !!(element && element.dataset && element.dataset.lightingControls === 'true');
     }
 
+    /**
+     * Whether model-viewer's shadow under the model should show: unless lights shine on the model and
+     * none from above it, so all from below or level with it. model-viewer draws its shadow whatever
+     * the lights. A light shines from above where its direction, in the scene with y up, points
+     * upwards. Lights with no strength or no direction (the ambient light) count neither way, so with
+     * none shining the shadow stays.
+     *
+     * @param {Object[]} lights - { strength, direction: {x, y, z} }
+     * @param {function(Object): number} [height] - The y of a direction in the scene, where the
+     *     directions are turned from it; the direction's own y by default
+     */
+    function shadowShown(lights, height) {
+        let shining = false;
+        for (let i = 0; i < lights.length; i++) {
+            const light = lights[i];
+            if (light.strength > 0 && light.direction) {
+                if ((height ? height(light.direction) : light.direction.y) > 1e-6) {
+                    return true;
+                }
+                shining = true;
+            }
+        }
+        return !shining;
+    }
+
     /** The values of a light that the lighting controls show, besides its direction */
     const SHOWN = ['color', 'groundColor', 'strength'];
 
@@ -511,6 +536,7 @@
         ready: ready,
         onChange: onChange,
         hasControls: hasControls,
+        shadowShown: shadowShown,
         controller: controller,
         environment: environment,
         rgbe: rgbe

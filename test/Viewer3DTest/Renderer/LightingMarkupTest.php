@@ -128,6 +128,21 @@ class LightingMarkupTest extends TestCase
         $this->assertContains('/modules/ThreeDViewer/js/model-viewer-lighting.js', $view->headScript()->files);
     }
 
+    /**
+     * The markup keeps the shadow whatever the lights: model-viewer-lighting.js hides it while no light
+     * shines from above, as the camera and the lighting controls move them.
+     */
+    public function testModelViewerShadowIsWrittenWhateverTheLights(): void
+    {
+        [$html, $view] = $this->render('model.glb', self::RIG + [
+            'threedviewer_light_1_elevation' => -30,
+            'threedviewer_light_2_elevation' => -60,
+            'threedviewer_model_viewer_shadow_intensity' => '0.6',
+        ]);
+        $this->assertStringContainsString(' shadow-intensity="0.6"', $html);
+        $this->assertContains('/modules/ThreeDViewer/js/model-viewer-lighting.js', $view->headScript()->files);
+    }
+
     public function testStlAndBabylonGetBrightness(): void
     {
         foreach ($this->viewers() as $name => [$file, $library]) {
