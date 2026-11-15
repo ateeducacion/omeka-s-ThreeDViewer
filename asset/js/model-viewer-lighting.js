@@ -35,9 +35,14 @@
    * model-viewer shows any shadow baked into the model instead. model-viewer sets the shadow's
    * strength again as a model loads, as AR starts and ends, and as shadowIntensity changes, all
    * through the scene's setShadowIntensity(), so a hidden shadow is hidden again each time.
+   *
+   * Showing it again reads the scene's shadowIntensity and hiding it calls the shadow's
+   * setIntensity(), so without both the switch would hide the shadow for good. model-viewer makes the
+   * shadow only once a model shows one, so it is checked here only if made already.
    */
   function shadowSwitch(scene) {
-    if (!scene || typeof scene.setShadowIntensity !== 'function') {
+    if (!scene || typeof scene.setShadowIntensity !== 'function' || typeof scene.shadowIntensity !== 'number'
+      || (scene.shadow && typeof scene.shadow.setIntensity !== 'function')) {
       return null;
     }
     let shown = true;
@@ -73,7 +78,7 @@
    *
    * @param {Function} [height] - As for shadowShown()
    */
-  function shadowShown(viewer, lights, height) {
+  function viewerShadowShown(viewer, lights, height) {
     return viewer.exposure <= 0 || window.ThreeDViewerLighting.shadowShown(lights, height);
   }
 
@@ -287,15 +292,16 @@
    * and the lights stay put. The turntable is watched each frame, as nothing announces its turns.
    *
    * The shadow is hidden while lights shine but none, turned by the frame, from above the model (see
-   * shadowShown()). The model's turn is about the vertical, so it raises or lowers no light.
+   * viewerShadowShown()). The model's turn is about the vertical, so it raises or lowers no light.
    *
    * @param {Object|null} rig - The rig as painted, its strengths already multiplied by brightness
    * @param {{x: number, z: number}} side - The side of the model the default view looks from
    * @param {?function(boolean)} shadow - From shadowSwitch()
+   * @param {Object|null} scene - From getScene()
+   * @param {?Array} rigged - The rig's lights, from rigLights()
    */
-  function setUpLighting(viewer, rig, side, shadow) {
+  function setUpLighting(viewer, rig, side, shadow, scene, rigged) {
     const lighting = window.ThreeDViewerLighting;
-    const scene = getScene(viewer);
     // model-viewer's three.js classes, which its bundle does not export, from the scene's own objects.
     // Scene.environmentRotation was added in three.js r162.
     const turnable = scene && scene.environmentRotation && scene.quaternion && scene.position;
@@ -314,7 +320,7 @@
 
     let lights;
     if (rig) {
-      lights = rigLights(rig, side);
+      lights = rigged;
       // Each repaint loads a new environment; without this, the loading bar flashes as a slider moves
       viewer.style.setProperty('--progress-bar-height', '0px');
     } else {
@@ -433,7 +439,7 @@
         changed = false;
         orient(all, frame);
         if (shadow) {
-          shadow(shadowShown(viewer, all, frame ? function (d) {
+          shadow(viewerShadowShown(viewer, all, frame ? function (d) {
             return heightTurned(frame, d);
           } : null));
         }
@@ -500,15 +506,17 @@
     // A rig also needs turning with the model, as auto-rotate turns it
     if (lighting && (controls || rig || viewer.dataset.lightingMode === 'viewer')) {
       // Decided for the default view before the model loads, so no frame shows a shadow to be hidden
-      const shadow = shadowSwitch(getScene(viewer));
+      const scene = getScene(viewer);
+      const shadow = shadowSwitch(scene);
+      const rigged = rig ? rigLights(rig, side) : null;
       if (shadow && rig) {
-        shadow(shadowShown(viewer, rigLights(rig, side)));
+        shadow(viewerShadowShown(viewer, rigged));
       }
       if (viewer.loaded) {
-        setUpLighting(viewer, rig, side, shadow);
+        setUpLighting(viewer, rig, side, shadow, scene, rigged);
       } else {
         viewer.addEventListener('load', function () {
-          setUpLighting(viewer, rig, side, shadow);
+          setUpLighting(viewer, rig, side, shadow, scene, rigged);
         }, { once: true });
       }
     }
