@@ -407,7 +407,7 @@ msgid "model-viewer shadow strength"
 msgstr ""
 
 #: src/Form/ConfigForm.php:370
-msgid "The shadow under GLB/glTF models. 0 shows only shadows baked into a model."
+msgid "Shadow under GLB/glTF models; at 0, those baked in. Hidden if lit only from below."
 msgstr ""
 
 #: src/Form/ConfigForm.php:379
