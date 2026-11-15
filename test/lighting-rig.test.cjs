@@ -796,7 +796,7 @@ const rigData = (...lights) => JSON.stringify({
 });
 
 test('model-viewer: the shadow is hidden while every light is below, without showing a baked shadow', () => {
-    const { scene, baked, listeners } = modelViewerHarness({ theta: 0, phi: 75 }, false,
+    const { scene, baked } = modelViewerHarness({ theta: 0, phi: 75 }, false,
         { dataset: { lights: rigData([30, -30], [-60, -60]) } });
     assert.equal(scene.shadow.intensity, 0, 'the shadow is hidden');
     assert.equal(baked.visible, false, 'a shadow baked into the model stays hidden');
@@ -805,12 +805,26 @@ test('model-viewer: the shadow is hidden while every light is below, without sho
     // model-viewer sets the strength again as a model loads, and as AR starts and ends
     scene.setShadowIntensity(0.3);
     assert.equal(scene.shadow.intensity, 0, 'still hidden');
+});
 
-    // The lighting controls raise a light above the model
+test('model-viewer: the shadow changes once the repainted lighting is shown, not before', async () => {
+    const { scene, baked, listeners } = modelViewerHarness({ theta: 0, phi: 75 }, false,
+        { dataset: { lights: rigData([30, -5]) } });
+    assert.equal(scene.shadow.intensity, 0, 'hidden while the light is below');
+
+    // A light dragged from below to above the model: the old environment is still shown
     listeners['threedviewer:lighting']({ detail: { mode: 'model', lights: [
-        { id: 'light1', azimuth: 30, elevation: 40 }
+        { id: 'light1', azimuth: 30, elevation: 5 }
     ] } });
-    assert.equal(scene.shadow.intensity, 0.3, 'shown again as configured');
+    assert.equal(scene.shadow.intensity, 0, 'still hidden before the repaint');
+    // Without model-viewer's cache, the repaint waits for the controls to pause
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    assert.equal(scene.shadow.intensity, 0, 'still hidden while the repaint loads');
+    // The first environment, from before the model loaded, is shown; the repaint loads after it
+    listeners['environment-change']();
+    assert.equal(scene.shadow.intensity, 0, 'still hidden under the old lighting');
+    listeners['environment-change']();
+    assert.equal(scene.shadow.intensity, 0.3, 'shown with the repainted lighting, as configured');
     assert.equal(baked.visible, false);
 });
 

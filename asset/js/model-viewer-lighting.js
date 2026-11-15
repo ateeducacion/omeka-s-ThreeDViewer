@@ -188,7 +188,8 @@
    * the default view looks from.
    *
    * One environment loads at a time: a rig painted meanwhile waits for it, and replaces any rig
-   * already waiting. Each environment is released once the next is shown.
+   * already waiting. Each environment is released once the next is shown. Once none is loading or
+   * waiting, the viewer's state.idle() is called, if set.
    */
   function applyRig(viewer, rig, back) {
     let state = environments.get(viewer);
@@ -274,6 +275,8 @@
     state.waiting = null;
     if (waiting) {
       applyRig(viewer, waiting.rig, waiting.back);
+    } else if (state.idle) {
+      state.idle();
     }
   }
 
@@ -293,6 +296,7 @@
    *
    * The shadow is hidden while lights shine but none, turned by the frame, from above the model (see
    * viewerShadowShown()). The model's turn is about the vertical, so it raises or lowers no light.
+   * While a repaint is on its way, the shadow waits for it, to change with the lighting shown.
    *
    * @param {Object|null} rig - The rig as painted, its strengths already multiplied by brightness
    * @param {{x: number, z: number}} side - The side of the model the default view looks from
@@ -340,6 +344,15 @@
     let latest = null;
     let placed = null;   // The lights and frame as last placed, to turn again with the model
     let following = null;   // The controller's update for a camera move, if it wants one
+    let shadowWaiting = null;   // Whether to show the shadow once the repaint is shown
+    if (rig && shadow) {
+      environments.get(viewer).idle = function () {
+        if (!repaint && shadowWaiting !== null) {
+          shadow(shadowWaiting);
+          shadowWaiting = null;
+        }
+      };
+    }
     function paint() {
       repaint = 0;
       applyRig(viewer, { ambient: latest[0], lights: latest.slice(1) }, side);
@@ -439,9 +452,14 @@
         changed = false;
         orient(all, frame);
         if (shadow) {
-          shadow(viewerShadowShown(viewer, all, frame ? function (d) {
+          const show = viewerShadowShown(viewer, all, frame ? function (d) {
             return heightTurned(frame, d);
-          } : null));
+          } : null);
+          if (repaint || shadowWaiting !== null) {
+            shadowWaiting = show;
+          } else {
+            shadow(show);
+          }
         }
       }
     });
