@@ -182,13 +182,15 @@
      * @param {Object[]} lights - { strength, direction: {x, y, z} }
      * @param {function(Object): number} [height] - The y of a direction in the scene, where the
      *     directions are turned from it; the direction's own y by default
+     * @param {number} [above] - The height over which a light is above the model; level by default
      */
-    function shadowShown(lights, height) {
+    function shadowShown(lights, height, above) {
+        const over = above === undefined ? 1e-6 : above;
         let shining = false;
         for (let i = 0; i < lights.length; i++) {
             const light = lights[i];
             if (light.strength > 0 && light.direction) {
-                if ((height ? height(light.direction) : light.direction.y) > 1e-6) {
+                if ((height ? height(light.direction) : light.direction.y) > over) {
                     return true;
                 }
                 shining = true;

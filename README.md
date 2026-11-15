@@ -73,8 +73,13 @@ See general end user documentation for [Installing a module](http://omeka.org/s/
      level with the model, including once the camera has turned lights fixed to the viewer or the lighting controls
      have moved them. So a light above at strength 0 and one below at 0.8 hide it. With no light shining, such as
      with only the ambient light or a brightness of 0, the shadow stays: an ambient-only rig keeps its shadow, and
-     adding any light below, with none above, hides it. With *Viewer default*, only the lighting controls can move
-     model-viewer's own light below level, and only with a model-viewer version that can turn its environment.
+     adding any light below, with none above, hides it. With *Viewer default*, the shadow is hidden only once
+     model-viewer's own light is below -74°: until then, some side panel of its `neutral` room, 16–39° up, can still
+     light the model from above. This is set from the `neutral` room and applies the same to `legacy` and custom
+     images. Only the lighting controls can move that light, and only with a model-viewer version that can turn its
+     environment. A light's height here is its height in the scene: with lights fixed to the viewer, turning the
+     camera counts; with lights fixed to the model, the controls show heights as seen from the camera, so with the
+     camera looking down the slider value alone isn't it.
    Settings that don't apply are hidden: the light rig until *Lights* is *Custom*, each light beyond *Number of
    lights*, the custom environment URL until *Custom image* is chosen, and the model-viewer or Babylon.js settings
    while the other library is selected (in a site's settings, the module's library). The settings after the general

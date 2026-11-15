@@ -793,6 +793,13 @@ test('shadowShown: once turned, a light above can end up below and one below abo
     assert.equal(lighting.shadowShown([down], tip(-50)), true);
 });
 
+test('shadowShown: a light counts as above only over the height given', () => {
+    const at = (y) => ({ strength: 1, direction: { x: 0, y, z: Math.sqrt(1 - y * y) } });
+    assert.equal(lighting.shadowShown([at(-0.5)], null, -0.6), true, 'over it');
+    assert.equal(lighting.shadowShown([at(-0.7)], null, -0.6), false, 'under it');
+    assert.equal(lighting.shadowShown([at(-0.5)]), false, 'level by default');
+});
+
 /** A rig for data-lights: ambient, and one light per [azimuth, elevation, strength] */
 const rigData = (...lights) => JSON.stringify({
     ambient: { color: '#ffffff', strength: 0.3 },
@@ -936,14 +943,20 @@ test('model-viewer: at brightness 0 no light shines, so the shadow stays, with o
     }
 });
 
-test('model-viewer: its own environment moved below the model by the controls hides the shadow', () => {
+test('model-viewer: its own environment moved below -74 degrees by the controls hides the shadow', () => {
     const { scene, listeners } = modelViewerHarness({ theta: 0, phi: 75 }, false);
     assert.equal(scene.shadow.intensity, 0.3, 'overhead to start with');
     const environment = (elevation) => listeners['threedviewer:lighting']({ detail: { mode: 'model', lights: [
         { id: 'environment', kind: 'environment', strength: 1, azimuth: 0, elevation }
     ] } });
     environment(-20);
-    assert.equal(scene.shadow.intensity, 0);
+    assert.equal(scene.shadow.intensity, 0.3, 'its side panels, 16-39 degrees up, still light the model from above');
+    environment(-73);
+    assert.equal(scene.shadow.intensity, 0.3, 'its lowest panel can still be above level');
+    environment(-74);
+    assert.equal(scene.shadow.intensity, 0.3, 'only below -74 degrees');
+    environment(-75);
+    assert.equal(scene.shadow.intensity, 0, 'every panel at or below level');
     environment(10);
     assert.equal(scene.shadow.intensity, 0.3);
 });
