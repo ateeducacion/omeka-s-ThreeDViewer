@@ -564,6 +564,9 @@ function modelViewerHarness(start, autoRotate = true, options = {}) {
         requestAnimationFrame: (f) => frames.push(f), setTimeout, clearTimeout, Blob: class {},
         URL: { createObjectURL: () => 'blob:rig', revokeObjectURL() {} },
         document: { readyState: 'complete', querySelectorAll: () => [viewer] } };
+    if (options.setUp) {
+        options.setUp(scene, viewer);
+    }
     runInNewContext(source, context);
     runInNewContext(readFileSync(join(__dirname, '../asset/js/model-viewer-lighting.js'), 'utf8'), context);
 
@@ -828,6 +831,43 @@ test('model-viewer: with a light above, the shadow is left as configured', () =>
     const { scene } = modelViewerHarness({ theta: 0, phi: 75 }, false,
         { dataset: { lights: rigData([30, -30], [-60, 45]) } });
     assert.equal(scene.shadow.intensity, 0.3);
+});
+
+test('model-viewer: a scene whose shadow strength it cannot read again is left alone', () => {
+    let original;
+    const { scene, listeners } = modelViewerHarness({ theta: 0, phi: 75 }, false, {
+        dataset: { lights: rigData([30, -30]) },
+        // As if an update renamed the private shadowIntensity
+        setUp: (scene) => {
+            const setShadowIntensity = scene.setShadowIntensity;
+            delete scene.shadowIntensity;
+            original = scene.setShadowIntensity = function (t) {
+                setShadowIntensity.call(this, t);
+                delete this.shadowIntensity;
+            };
+        }
+    });
+    assert.equal(scene.setShadowIntensity, original, 'not wrapped');
+    assert.equal(scene.shadow.intensity, 0.3, 'the shadow is left as configured');
+    listeners['threedviewer:lighting']({ detail: { mode: 'model', lights: [
+        { id: 'light1', azimuth: 30, elevation: 40 }
+    ] } });
+    assert.equal(scene.shadow.intensity, 0.3, 'never hidden for good');
+});
+
+test('model-viewer: the scene is fetched once per viewer', () => {
+    let registered = 0;
+    modelViewerHarness({ theta: 0, phi: 75 }, false, {
+        dataset: { lights: rigData([30, -30]) },
+        setUp: (scene, viewer) => {
+            const register = viewer.registerEffectComposer;
+            viewer.registerEffectComposer = (composer) => {
+                registered++;
+                register(composer);
+            };
+        }
+    });
+    assert.equal(registered, 1);
 });
 
 test('model-viewer: fixed to the viewer, looking down drops a light behind the model below it', () => {
