@@ -364,7 +364,7 @@ class ConfigForm extends Form
             'type' => Element\Number::class,
             'options' => [
                 'label' => 'model-viewer shadow strength', // @translate
-                'info' => 'The shadow under GLB/glTF models. 0 shows none.', // @translate
+                'info' => 'The shadow under GLB/glTF models. 0 shows only shadows baked into a model.', // @translate
             ],
             'attributes' => self::rangeAttributes('threedviewer_model_viewer_shadow_intensity'),
         ]);

@@ -66,14 +66,16 @@ See general end user documentation for [Installing a module](http://omeka.org/s/
      model-viewer has no lamps, so there the rig is painted into the environment image that lights the model.
    - **model-viewer environment** (with *Viewer default*): model-viewer's own, `neutral`, `legacy`, or an image URL.
    - **model-viewer shadow strength** and **softness** (with either *Lights* setting): the shadow under GLB/glTF
-     models. A strength of 0 shows none. model-viewer draws it whatever the lights, so it is hidden while lights
-     shine on the model but none from above. The shadow is either fully shown or hidden, never faded. Only lights
-     with a strength above 0 count; the ambient light never does. One light above level with any strength shows the
-     shadow at full strength, however low the light. The shadow is hidden while every light that counts is below or
-     level with the model, including once the camera has turned lights fixed to the viewer or the lighting controls
-     have moved them. So a light above at strength 0 and one below at 0.8 hide it. With no light shining, such as
-     with only the ambient light or a brightness of 0, the shadow stays: an ambient-only rig keeps its shadow, and
-     adding any light below, with none above, hides it. With *Viewer default*, the shadow is hidden only once
+     models. A strength of 0, the default, draws none, but model-viewer then shows any shadow baked into the model.
+     model-viewer shows either whatever the lights, so both are hidden while lights shine on the model but none
+     from above. The shadow is either fully shown or hidden, never faded. Only lights with a strength above 0 count;
+     the ambient light never does. One such light above level, however weak, shows the shadow at full strength,
+     however low the light. The shadow is hidden while every light that counts is below or level with the model,
+     including once the camera has turned lights fixed to the viewer or the lighting controls have moved them. So a
+     light above at strength 0 and one below at 0.8 hide it. With no light shining, such as with only the ambient
+     light or a brightness of 0, the shadow stays: an ambient-only rig keeps its shadow, and adding a light below
+     with a strength above 0, with none above, hides it. As the lighting controls repaint a rig, the shadow follows
+     the lighting on screen, changing as each repaint is shown. With *Viewer default*, the shadow is hidden only once
      model-viewer's own light is below -74°: until then, some side panel of its `neutral` room, 16–39° up, can still
      light the model from above. This is set from the `neutral` room and applies the same to `legacy` and custom
      images. Only the lighting controls can move that light, and only with a model-viewer version that can turn its

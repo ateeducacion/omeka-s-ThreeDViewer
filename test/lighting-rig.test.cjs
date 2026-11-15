@@ -521,17 +521,20 @@ function modelViewerHarness(start, autoRotate = true, options = {}) {
     const THREE = three.window.THREE || three.THREE;
     THREE.Quaternion.prototype.invert = THREE.Quaternion.prototype.inverse;
     // model-viewer's shadow, as it handles it: through the scene, 0.5 x the element's shadowIntensity, with
-    // any shadow baked into the model shown at 0
+    // any shadow baked into the model shown at 0, and neither until a model is loaded (_currentGLTF)
     const baked = { visible: false };
     const scene = { environmentRotation: new THREE.Euler(), quaternion: new THREE.Quaternion(),
         position: new THREE.Vector3(), queueRender() {},
-        shadow: null, shadowIntensity: 0,
+        shadow: null, shadowIntensity: 0, _currentGLTF: options.unloaded ? null : {},
         // Also called as the model is framed, first with false
         setBakedShadowVisibility(t = this.shadowIntensity <= 0) {
             baked.visible = t;
         },
         setShadowIntensity(t) {
             this.shadowIntensity = t;
+            if (!this._currentGLTF) {
+                return;
+            }
             this.setBakedShadowVisibility();
             if (t > 0 && !this.shadow) {
                 this.shadow = { intensity: 0, setIntensity(v) { this.intensity = v; } };
@@ -562,12 +565,19 @@ function modelViewerHarness(start, autoRotate = true, options = {}) {
         removeEventListener() {},
         dispatchEvent: (event) => { events.push(event); }
     };
+    let urls = 0;
     class CustomEvent { constructor(type, init) { this.type = type; this.detail = init.detail; } }
     const window = { customElements: { whenDefined: () => ({ then: (go) => go() }) } };
     const context = { window, console, CustomEvent, customElements: window.customElements,
         requestAnimationFrame: (f) => frames.push(f), setTimeout, clearTimeout, Blob: class {},
-        URL: { createObjectURL: () => 'blob:rig', revokeObjectURL() {} },
+        URL: { createObjectURL: () => 'blob:rig' + ++urls, revokeObjectURL() {} },
         document: { readyState: 'complete', querySelectorAll: () => [viewer] } };
+    // model-viewer's cache of environments, reached as model-viewer-lighting.js does, if wanted: a Map
+    // of the script's own realm, for its instanceof check
+    const cache = options.cache ? runInNewContext('new Map()', context) : null;
+    if (cache) {
+        viewer[Symbol('renderer')] = { textureUtils: { skyboxCache: cache } };
+    }
     if (options.setUp) {
         options.setUp(scene, viewer);
     }
@@ -582,7 +592,24 @@ function modelViewerHarness(start, autoRotate = true, options = {}) {
         viewer.turntableRotation = degrees * Math.PI / 180;
         frames.splice(0).forEach((f) => f());
     };
-    return { THREE, listeners, turn, events, spin, frames, scene, baked, move: (to) => { camera = to; } };
+    // model-viewer starting to load the environment it was given, as it does once on screen; fail() rejects it
+    const load = () => {
+        let fail;
+        const loading = new Promise((resolve, reject) => { fail = () => reject(new Error('Failed')); });
+        loading.catch(() => {});
+        cache.set(viewer.environmentImage, loading);
+        return { fail };
+    };
+    return { THREE, listeners, turn, events, spin, frames, scene, baked, load,
+        move: (to) => { camera = to; },
+        // Run the frames requested, as the browser does
+        frame: () => frames.splice(0).forEach((f) => f()),
+        // model-viewer showing the environment it was loading
+        show: () => listeners['environment-change'](),
+        // A light dragged to an elevation, 30 degrees round
+        drag: (elevation, mode = 'model') => listeners['threedviewer:lighting']({ detail: { mode, lights: [
+            { id: 'light1', azimuth: 30, elevation }
+        ] } }) };
 }
 
 test('model-viewer: without auto-rotate, nothing watches the turntable every frame', () => {
@@ -818,29 +845,124 @@ test('model-viewer: the shadow is hidden while every light is below, without sho
     assert.equal(scene.shadow.intensity, 0, 'still hidden');
 });
 
-test('model-viewer: the shadow changes once the repainted lighting is shown, not before', async () => {
-    const { scene, baked, listeners } = modelViewerHarness({ theta: 0, phi: 75 }, false,
+test('model-viewer: the shadow changes once the repainted lighting is shown, not before', (t) => {
+    t.mock.timers.enable({ apis: ['setTimeout'] });
+    const { scene, baked, drag, show } = modelViewerHarness({ theta: 0, phi: 75 }, false,
         { dataset: { lights: rigData([30, -5]) } });
     assert.equal(scene.shadow.intensity, 0, 'hidden while the light is below');
 
     // A light dragged from below to above the model: the old environment is still shown
-    listeners['threedviewer:lighting']({ detail: { mode: 'model', lights: [
-        { id: 'light1', azimuth: 30, elevation: 5 }
-    ] } });
+    drag(5);
     assert.equal(scene.shadow.intensity, 0, 'still hidden before the repaint');
     // Without model-viewer's cache, the repaint waits for the controls to pause
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    t.mock.timers.tick(250);
     assert.equal(scene.shadow.intensity, 0, 'still hidden while the repaint loads');
     // The first environment, from before the model loaded, is shown; the repaint loads after it
-    listeners['environment-change']();
+    show();
     assert.equal(scene.shadow.intensity, 0, 'still hidden under the old lighting');
-    listeners['environment-change']();
+    show();
     assert.equal(scene.shadow.intensity, 0.3, 'shown with the repainted lighting, as configured');
     assert.equal(baked.visible, false);
 });
 
-test('model-viewer: at strength 0, a shadow baked into the model is hidden while every light is below', async () => {
-    const { scene, baked, listeners } = modelViewerHarness({ theta: 0, phi: 75 }, false,
+test('model-viewer: with its cache reachable, the shadow changes once the repainted lighting is shown', (t) => {
+    t.mock.timers.enable({ apis: ['setTimeout'] });
+    const { scene, drag, show, load, frame } = modelViewerHarness({ theta: 0, phi: 75 }, false,
+        { cache: true, dataset: { lights: rigData([30, -5]) } });
+    // model-viewer starts loading the first environment once on screen; watch() polls for it
+    t.mock.timers.tick(1000);
+    load();
+    t.mock.timers.tick(250);
+    show();
+    assert.equal(scene.shadow.intensity, 0, 'hidden while the light is below');
+
+    drag(5);
+    assert.equal(scene.shadow.intensity, 0, 'still hidden, with the repaint waiting for a frame');
+    frame();
+    t.mock.timers.tick(1000);
+    assert.equal(scene.shadow.intensity, 0, 'still hidden, with the repaint yet to load');
+    load();
+    t.mock.timers.tick(250);
+    assert.equal(scene.shadow.intensity, 0, 'still hidden while it loads');
+    show();
+    assert.equal(scene.shadow.intensity, 0.3, 'shown with the repainted lighting');
+});
+
+test('model-viewer: fixed to the viewer, the shadow turns with the camera while a repaint is on its way', (t) => {
+    t.mock.timers.enable({ apis: ['setTimeout'] });
+    const { scene, listeners, move, load, show, frame } = modelViewerHarness({ theta: 0, phi: 75 }, false,
+        { cache: true, dataset: { lights: rigData([180, 20]), lightingMode: 'viewer' } });
+    load();
+    t.mock.timers.tick(250);
+    show();
+    assert.equal(scene.shadow.intensity, 0.3, '20 degrees up in the default view');
+
+    // Brighter, in the same direction: repainted on the next frame
+    listeners['threedviewer:lighting']({ detail: { mode: 'viewer', lights: [{ id: 'light1', strength: 2 }] } });
+    move({ theta: 0, phi: 30 });
+    listeners['camera-change']();
+    assert.equal(scene.shadow.intensity, 0, 'hidden at once, as the environment on screen turns down');
+    frame();
+    move({ theta: 0, phi: 90 });
+    listeners['camera-change']();
+    assert.equal(scene.shadow.intensity, 0.3, 'and shown again while the repaint loads');
+});
+
+test('model-viewer: during a long drag, the shadow changes with each repainted lighting shown', (t) => {
+    t.mock.timers.enable({ apis: ['setTimeout'] });
+    const { scene, drag, show, load, frame } = modelViewerHarness({ theta: 0, phi: 75 }, false,
+        { cache: true, dataset: { lights: rigData([30, -5]) } });
+    load();
+    t.mock.timers.tick(250);
+    show();
+
+    drag(5);
+    frame();
+    load();
+    t.mock.timers.tick(250);
+    // Dragged on while the lighting from above loads: this repaint waits for it
+    drag(-5);
+    frame();
+    show();
+    assert.equal(scene.shadow.intensity, 0.3, 'shown with the lighting from above, while the next waits');
+    load();
+    t.mock.timers.tick(250);
+    show();
+    assert.equal(scene.shadow.intensity, 0, 'hidden with the lighting from below');
+});
+
+test('model-viewer: a repaint that fails to load leaves the shadow as the lighting shown', async (t) => {
+    t.mock.timers.enable({ apis: ['setTimeout'] });
+    const { scene, drag, show, load, frame } = modelViewerHarness({ theta: 0, phi: 75 }, false,
+        { cache: true, dataset: { lights: rigData([30, -5]) } });
+    load();
+    t.mock.timers.tick(250);
+    show();
+
+    drag(5);
+    frame();
+    const repaint = load();
+    t.mock.timers.tick(250);
+    repaint.fail();
+    await new Promise(setImmediate);
+    assert.equal(scene.shadow.intensity, 0, 'still hidden, as the lighting from below is still shown');
+});
+
+test('model-viewer: without its cache, giving up on a repaint leaves the shadow as the lighting shown', (t) => {
+    t.mock.timers.enable({ apis: ['setTimeout'] });
+    const { scene, drag } = modelViewerHarness({ theta: 0, phi: 75 }, false,
+        { dataset: { lights: rigData([30, -5]) } });
+    drag(5);
+    // Painted once the controls pause, after giving up on the first environment, then given up on itself
+    t.mock.timers.tick(250);
+    t.mock.timers.tick(10000);
+    t.mock.timers.tick(10000);
+    assert.equal(scene.shadow.intensity, 0, 'still hidden, as no lighting from above has been shown');
+});
+
+test('model-viewer: at strength 0, a shadow baked into the model is hidden while every light is below', (t) => {
+    t.mock.timers.enable({ apis: ['setTimeout'] });
+    const { scene, baked, listeners, show } = modelViewerHarness({ theta: 0, phi: 75 }, false,
         { strength: 0, dataset: { lights: rigData([30, -30], [-60, -60]) } });
     assert.equal(scene.shadow, null, 'model-viewer makes no shadow of its own at 0');
     assert.equal(baked.visible, false, 'the baked shadow is hidden');
@@ -854,9 +976,9 @@ test('model-viewer: at strength 0, a shadow baked into the model is hidden while
         { id: 'light1', azimuth: 30, elevation: 40 }
     ] } });
     // Once the repainted lighting is shown, after the first environment
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    listeners['environment-change']();
-    listeners['environment-change']();
+    t.mock.timers.tick(250);
+    show();
+    show();
     assert.equal(baked.visible, true, 'shown again with a light above');
     assert.equal(scene.shadow, null);
 });
@@ -873,11 +995,31 @@ test('model-viewer: before the model loads, the shadow is hidden as soon as it e
     assert.equal(scene.shadow, null, 'no shadow yet');
 
     // model-viewer creates its shadow as the model loads, before its load event
+    scene._currentGLTF = {};
     scene.setShadowIntensity(0.3);
     assert.equal(scene.shadow.intensity, 0, 'hidden from its first frame');
     assert.equal(baked.visible, false);
     listeners.load();
     assert.equal(scene.shadow.intensity, 0, 'still hidden once loaded');
+});
+
+test('model-viewer: at strength 0, a baked shadow hidden before the model loads shows once a light rises above', (t) => {
+    t.mock.timers.enable({ apis: ['setTimeout'] });
+    const { scene, baked, listeners, drag, show } = modelViewerHarness({ theta: 0, phi: 75 }, false,
+        { unloaded: true, strength: 0, dataset: { lights: rigData([30, -30]) } });
+    // The model loads: model-viewer sets the shadow's strength, then frames the model
+    scene._currentGLTF = {};
+    scene.setShadowIntensity(0);
+    scene.setBakedShadowVisibility(false);
+    scene.setBakedShadowVisibility();
+    listeners.load();
+    assert.equal(baked.visible, false, 'hidden while the light is below');
+
+    drag(40);
+    t.mock.timers.tick(250);
+    show();
+    show();
+    assert.equal(baked.visible, true, 'shown with the lighting from above');
 });
 
 test('model-viewer: with a light above, the shadow is left as configured', () => {

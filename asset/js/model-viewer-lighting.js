@@ -12,8 +12,8 @@
   'use strict';
 
   /**
-   * Each viewer's rig environments: the Blob URL model-viewer shows, the one it is loading, and the
-   * rig to paint once that has loaded
+   * Each viewer's rig environments: the Blob URL model-viewer shows and the lights painted into it,
+   * the one it is loading, and the rig to paint once that has loaded
    */
   const environments = new WeakMap();
 
@@ -83,12 +83,13 @@
       }
       shown = show;
       if (show) {
+        // Which shows any baked shadow again too, once a model has any
         scene.setShadowIntensity(scene.shadowIntensity);
       } else {
         hide();
-      }
-      if (setBakedShadowVisibility) {
-        scene.setBakedShadowVisibility();
+        if (setBakedShadowVisibility) {
+          scene.setBakedShadowVisibility();
+        }
       }
       if (typeof scene.queueRender === 'function') {
         scene.queueRender();
@@ -213,26 +214,32 @@
    * the default view looks from.
    *
    * One environment loads at a time: a rig painted meanwhile waits for it, and replaces any rig
-   * already waiting. Each environment is released once the next is shown. Once none is loading or
-   * waiting, the viewer's state.idle() is called, if set.
+   * already waiting. Each environment is released once the next is shown, and state.onShown() is
+   * then called, if set.
+   *
+   * @param {Object[]} lights - The rig's lights as the controller has them, { strength, direction },
+   *     kept for the shadow as they are now: the controller changes them in place
    */
-  function applyRig(viewer, rig, back) {
+  function applyRig(viewer, rig, back, lights) {
     let state = environments.get(viewer);
     if (!state) {
-      state = { shown: null, loading: null, timer: 0, waiting: null };
+      state = { shown: null, lights: null, loading: null, painted: null, timer: 0, waiting: null };
       environments.set(viewer, state);
       viewer.addEventListener('environment-change', function () {
         loaded(viewer, state, true);
       });
     }
     if (state.loading) {
-      state.waiting = { rig: rig, back: back };
+      state.waiting = { rig: rig, back: back, lights: lights };
       return;
     }
 
     const lighting = window.ThreeDViewerLighting;
     const hdr = lighting.rgbe(lighting.environment(rig, back));
     state.loading = URL.createObjectURL(new Blob([hdr], { type: 'image/vnd.radiance' }));
+    state.painted = lights.map(function (light) {
+      return { strength: light.strength, direction: light.direction };
+    });
     // model-viewer chooses its HDR loader by the URL's ending; fetch ignores the fragment
     viewer.environmentImage = state.loading + '#.hdr';
     watch(viewer, state, state.loading);
@@ -286,10 +293,14 @@
     const old = shown ? state.shown : state.loading;
     if (shown) {
       state.shown = state.loading;
+      state.lights = state.painted;
     }
     state.loading = null;
     if (old) {
       release(viewer, old);
+    }
+    if (shown && state.onShown) {
+      state.onShown();
     }
     next(viewer, state);
   }
@@ -299,9 +310,7 @@
     const waiting = state.waiting;
     state.waiting = null;
     if (waiting) {
-      applyRig(viewer, waiting.rig, waiting.back);
-    } else if (state.idle) {
-      state.idle();
+      applyRig(viewer, waiting.rig, waiting.back, waiting.lights);
     }
   }
 
@@ -322,7 +331,9 @@
    * The shadow is hidden while lights shine but none, turned by the frame, from above the model (see
    * viewerShadowShown()); model-viewer's own environment, only once its up axis is below
    * ENVIRONMENT_ABOVE. The model's turn is about the vertical, so it raises or lowers no light.
-   * While a repaint is on its way, the shadow waits for it, to change with the lighting shown.
+   * A rig's shadow follows the lighting on screen: the lights of the environment shown, turned by the
+   * frame now, decided again as each repaint is shown and as the frame turns. Until a repaint is
+   * shown, those are the rig's own lights, as attach() decided before the model loaded.
    *
    * @param {Object|null} rig - The rig as painted, its strengths already multiplied by brightness
    * @param {{x: number, z: number}} side - The side of the model the default view looks from
@@ -373,18 +384,24 @@
     let latest = null;
     let placed = null;   // The lights and frame as last placed, to turn again with the model
     let following = null;   // The controller's update for a camera move, if it wants one
-    let shadowWaiting = null;   // Whether to show the shadow once the repaint is shown
-    if (rig && shadow) {
-      environments.get(viewer).idle = function () {
-        if (!repaint && shadowWaiting !== null) {
-          shadow(shadowWaiting);
-          shadowWaiting = null;
-        }
-      };
-    }
+    const state = rig ? environments.get(viewer) : null;
     function paint() {
       repaint = 0;
-      applyRig(viewer, { ambient: latest[0], lights: latest.slice(1) }, side);
+      applyRig(viewer, { ambient: latest[0], lights: latest.slice(1) }, side, latest);
+    }
+
+    /** Show the shadow or not for the lighting on screen, turned by the frame */
+    function decideShadow() {
+      if (!shadow || !placed) {
+        return;
+      }
+      const frame = placed.frame;
+      shadow(viewerShadowShown(viewer, state ? state.lights || rigged : placed.all, frame ? function (d) {
+        return heightTurned(frame, d);
+      } : null, above));
+    }
+    if (state) {
+      state.onShown = decideShadow;
     }
 
     /** Turn the environment by the frame, and model-viewer's own by its direction too */
@@ -480,16 +497,7 @@
         }
         changed = false;
         orient(all, frame);
-        if (shadow) {
-          const show = viewerShadowShown(viewer, all, frame ? function (d) {
-            return heightTurned(frame, d);
-          } : null, above);
-          if (repaint || shadowWaiting !== null) {
-            shadowWaiting = show;
-          } else {
-            shadow(show);
-          }
-        }
+        decideShadow();
       }
     });
 
@@ -546,8 +554,9 @@
       viewer.exposure = 1;
     }
     const side = viewSide(viewer);
+    const rigged = rig ? rigLights(rig, side) : null;
     if (rig) {
-      applyRig(viewer, rig, side);
+      applyRig(viewer, rig, side, rigged);
     }
 
     // A rig also needs turning with the model, as auto-rotate turns it
@@ -555,7 +564,6 @@
       // Decided for the default view before the model loads, so no frame shows a shadow to be hidden
       const scene = getScene(viewer);
       const shadow = shadowSwitch(scene);
-      const rigged = rig ? rigLights(rig, side) : null;
       if (shadow && rig) {
         shadow(viewerShadowShown(viewer, rigged));
       }
