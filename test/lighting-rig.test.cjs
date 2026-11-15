@@ -526,9 +526,13 @@ function modelViewerHarness(start, autoRotate = true, options = {}) {
     const scene = { environmentRotation: new THREE.Euler(), quaternion: new THREE.Quaternion(),
         position: new THREE.Vector3(), queueRender() {},
         shadow: null, shadowIntensity: 0,
+        // Also called as the model is framed, first with false
+        setBakedShadowVisibility(t = this.shadowIntensity <= 0) {
+            baked.visible = t;
+        },
         setShadowIntensity(t) {
             this.shadowIntensity = t;
-            baked.visible = t <= 0;
+            this.setBakedShadowVisibility();
             if (t > 0 && !this.shadow) {
                 this.shadow = { intensity: 0, setIntensity(v) { this.intensity = v; } };
             }
@@ -538,7 +542,7 @@ function modelViewerHarness(start, autoRotate = true, options = {}) {
         } };
     // Unloaded, model-viewer creates the shadow only as the model loads
     if (!options.unloaded) {
-        scene.setShadowIntensity(0.3);
+        scene.setShadowIntensity(options.strength === undefined ? 0.3 : options.strength);
     }
     const listeners = {};
     const frames = [];
@@ -826,6 +830,30 @@ test('model-viewer: the shadow changes once the repainted lighting is shown, not
     listeners['environment-change']();
     assert.equal(scene.shadow.intensity, 0.3, 'shown with the repainted lighting, as configured');
     assert.equal(baked.visible, false);
+});
+
+test('model-viewer: at strength 0, a shadow baked into the model is hidden while every light is below', () => {
+    const { scene, baked, listeners } = modelViewerHarness({ theta: 0, phi: 75 }, false,
+        { strength: 0, dataset: { lights: rigData([30, -30], [-60, -60]) } });
+    assert.equal(scene.shadow, null, 'model-viewer makes no shadow of its own at 0');
+    assert.equal(baked.visible, false, 'the baked shadow is hidden');
+
+    // model-viewer shows it again as it frames the model
+    scene.setBakedShadowVisibility(false);
+    scene.setBakedShadowVisibility();
+    assert.equal(baked.visible, false, 'still hidden once framed');
+
+    listeners['threedviewer:lighting']({ detail: { mode: 'model', lights: [
+        { id: 'light1', azimuth: 30, elevation: 40 }
+    ] } });
+    assert.equal(baked.visible, true, 'shown again with a light above');
+    assert.equal(scene.shadow, null);
+});
+
+test('model-viewer: at strength 0, with a light above, a shadow baked into the model shows', () => {
+    const { baked } = modelViewerHarness({ theta: 0, phi: 75 }, false,
+        { strength: 0, dataset: { lights: rigData([30, -30], [-60, 45]) } });
+    assert.equal(baked.visible, true);
 });
 
 test('model-viewer: before the model loads, the shadow is hidden as soon as it exists', () => {
