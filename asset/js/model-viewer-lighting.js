@@ -27,6 +27,13 @@
   const ENVIRONMENT_POLL = 250;
 
   /**
+   * The height, as the y of its up axis, below which model-viewer's own environment no longer lights
+   * the model from above: -45 degrees, past the side panels of its neutral room, 30-45 degrees up,
+   * which give it most of its light
+   */
+  const ENVIRONMENT_SHADOW_HEIGHT = Math.sin(-45 * Math.PI / 180);
+
+  /**
    * A switch for model-viewer's shadow under the model, which it draws whatever the lights: called
    * with false, it hides the shadow, and with true shows it again as configured. Null where this
    * model-viewer's scene has no shadow to reach.
@@ -309,7 +316,8 @@
    * and the lights stay put. The turntable is watched each frame, as nothing announces its turns.
    *
    * The shadow is hidden while lights shine but none, turned by the frame, from above the model (see
-   * viewerShadowShown()). The model's turn is about the vertical, so it raises or lowers no light.
+   * viewerShadowShown()); model-viewer's own environment, only once its up axis is below
+   * ENVIRONMENT_SHADOW_HEIGHT. The model's turn is about the vertical, so it raises or lowers no light.
    * While a repaint is on its way, the shadow waits for it, to change with the lighting shown.
    *
    * @param {Object|null} rig - The rig as painted, its strengths already multiplied by brightness
@@ -466,9 +474,10 @@
         changed = false;
         orient(all, frame);
         if (shadow) {
-          const show = viewerShadowShown(viewer, all, frame ? function (d) {
-            return heightTurned(frame, d);
-          } : null);
+          const show = viewerShadowShown(viewer, all, function (d) {
+            const height = frame ? heightTurned(frame, d) : d.y;
+            return rig ? height : height - ENVIRONMENT_SHADOW_HEIGHT;
+          });
           if (repaint || shadowWaiting !== null) {
             shadowWaiting = show;
           } else {

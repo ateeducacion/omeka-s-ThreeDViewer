@@ -936,14 +936,16 @@ test('model-viewer: at brightness 0 no light shines, so the shadow stays, with o
     }
 });
 
-test('model-viewer: its own environment moved below the model by the controls hides the shadow', () => {
+test('model-viewer: its own environment moved below -45 degrees by the controls hides the shadow', () => {
     const { scene, listeners } = modelViewerHarness({ theta: 0, phi: 75 }, false);
     assert.equal(scene.shadow.intensity, 0.3, 'overhead to start with');
     const environment = (elevation) => listeners['threedviewer:lighting']({ detail: { mode: 'model', lights: [
         { id: 'environment', kind: 'environment', strength: 1, azimuth: 0, elevation }
     ] } });
     environment(-20);
-    assert.equal(scene.shadow.intensity, 0);
+    assert.equal(scene.shadow.intensity, 0.3, 'its side panels, 30-45 degrees up, still light the model from above');
+    environment(-60);
+    assert.equal(scene.shadow.intensity, 0, 'past the side panels');
     environment(10);
     assert.equal(scene.shadow.intensity, 0.3);
 });
