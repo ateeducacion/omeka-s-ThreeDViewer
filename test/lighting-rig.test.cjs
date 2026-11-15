@@ -566,11 +566,12 @@ function modelViewerHarness(start, autoRotate = true, options = {}) {
         dispatchEvent: (event) => { events.push(event); }
     };
     let urls = 0;
+    const revoked = [];
     class CustomEvent { constructor(type, init) { this.type = type; this.detail = init.detail; } }
     const window = { customElements: { whenDefined: () => ({ then: (go) => go() }) } };
     const context = { window, console, CustomEvent, customElements: window.customElements,
         requestAnimationFrame: (f) => frames.push(f), setTimeout, clearTimeout, Blob: class {},
-        URL: { createObjectURL: () => 'blob:rig' + ++urls, revokeObjectURL() {} },
+        URL: { createObjectURL: () => 'blob:rig' + ++urls, revokeObjectURL: (url) => revoked.push(url) },
         document: { readyState: 'complete', querySelectorAll: () => [viewer] } };
     // model-viewer's cache of environments, reached as model-viewer-lighting.js does, if wanted: a Map
     // of the script's own realm, for its instanceof check
@@ -592,20 +593,40 @@ function modelViewerHarness(start, autoRotate = true, options = {}) {
         viewer.turntableRotation = degrees * Math.PI / 180;
         frames.splice(0).forEach((f) => f());
     };
-    // model-viewer starting to load the environment it was given, as it does once on screen; fail() rejects it
+    // model-viewer starting to load the environment it was given, as it does once on screen. fail()
+    // rejects it; model-viewer then clears its environment, unless told not to (not an Error), once
+    // its own promises have settled. show() resolves it with its texture.
+    const loaded = {};
     const load = () => {
         let fail;
-        const loading = new Promise((resolve, reject) => { fail = () => reject(new Error('Failed')); });
+        const loading = new Promise((resolve, reject) => {
+            loaded[viewer.environmentImage] = () => resolve({ dispose() {} });
+            fail = (cleared = true) => {
+                reject(new Error('Failed'));
+                Promise.resolve().then(() => Promise.resolve()).then(() => {
+                    if (cleared) {
+                        scene.environment = null;
+                    }
+                });
+            };
+        });
         loading.catch(() => {});
         cache.set(viewer.environmentImage, loading);
         return { fail };
     };
-    return { THREE, listeners, turn, events, spin, frames, scene, baked, load, viewer,
+    return { THREE, listeners, turn, events, spin, frames, scene, baked, load, viewer, revoked,
+        created: () => urls,
         move: (to) => { camera = to; },
         // Run the frames requested, as the browser does
         frame: () => frames.splice(0).forEach((f) => f()),
-        // model-viewer showing the environment it was loading
-        show: () => listeners['environment-change'](),
+        // model-viewer showing the environment it was loading: the event, then the map in the scene
+        show: () => {
+            listeners['environment-change']();
+            if (loaded[viewer.environmentImage]) {
+                loaded[viewer.environmentImage]();
+            }
+            scene.environment = { name: viewer.environmentImage };
+        },
         // A light dragged to an elevation, 30 degrees round
         drag: (elevation, mode = 'model') => listeners['threedviewer:lighting']({ detail: { mode, lights: [
             { id: 'light1', azimuth: 30, elevation }
@@ -933,7 +954,31 @@ test('model-viewer: during a long drag, the shadow changes with each repainted l
 
 test('model-viewer: a repaint that fails to load shows the shadow, as model-viewer then shows no environment', async (t) => {
     t.mock.timers.enable({ apis: ['setTimeout'] });
-    const { scene, drag, show, load, frame } = modelViewerHarness({ theta: 0, phi: 75 }, false,
+    const { scene, drag, show, load, frame, viewer, revoked } = modelViewerHarness({ theta: 0, phi: 75 }, false,
+        { cache: true, dataset: { lights: rigData([30, -5]) } });
+    load();
+    t.mock.timers.tick(250);
+    show();
+    const shown = viewer.environmentImage.replace(/#\.hdr$/, '');
+    assert.equal(scene.shadow.intensity, 0, 'hidden while the light is below');
+
+    drag(5);
+    frame();
+    const repaint = load();
+    const failed = viewer.environmentImage.replace(/#\.hdr$/, '');
+    t.mock.timers.tick(250);
+    // model-viewer then clears the environment: setEnvironmentAndSkybox(null, null)
+    repaint.fail();
+    await new Promise(setImmediate);
+    t.mock.timers.tick(1);
+    await new Promise(setImmediate);
+    assert.equal(scene.shadow.intensity, 0.3, 'shown, as no light shines');
+    assert.deepEqual(revoked.slice().sort(), [shown, failed].sort(), 'both released, as neither is shown');
+});
+
+test('model-viewer: a repaint that fails while model-viewer keeps its environment leaves that shown', async (t) => {
+    t.mock.timers.enable({ apis: ['setTimeout'] });
+    const { scene, drag, show, load, frame, viewer, revoked } = modelViewerHarness({ theta: 0, phi: 75 }, false,
         { cache: true, dataset: { lights: rigData([30, -5]) } });
     load();
     t.mock.timers.tick(250);
@@ -943,36 +988,80 @@ test('model-viewer: a repaint that fails to load shows the shadow, as model-view
     drag(5);
     frame();
     const repaint = load();
+    const failed = viewer.environmentImage.replace(/#\.hdr$/, '');
     t.mock.timers.tick(250);
-    // model-viewer then clears the environment: setEnvironmentAndSkybox(null, null)
-    repaint.fail();
+    // Not an Error: model-viewer leaves its environment as it was
+    repaint.fail(false);
     await new Promise(setImmediate);
-    assert.equal(scene.shadow.intensity, 0.3, 'shown, as no light shines');
+    t.mock.timers.tick(1);
+    await new Promise(setImmediate);
+    assert.equal(scene.shadow.intensity, 0, 'still hidden under the lighting shown');
+    assert.deepEqual(revoked, [failed], 'only the failed repaint is released');
 });
 
-test('model-viewer: without its cache, giving up on a repaint leaves the shadow as the lighting shown', (t) => {
+test('model-viewer: without its cache, a repaint waits however long for the lighting shown, and the shadow too', (t) => {
     t.mock.timers.enable({ apis: ['setTimeout'] });
     const { scene, drag } = modelViewerHarness({ theta: 0, phi: 75 }, false,
         { dataset: { lights: rigData([30, -5]) } });
     drag(5);
-    // Painted once the controls pause, after giving up on the first environment, then given up on itself
+    // Waiting for the first environment, however long it takes
     t.mock.timers.tick(250);
     t.mock.timers.tick(10000);
     t.mock.timers.tick(10000);
     assert.equal(scene.shadow.intensity, 0, 'still hidden, as no lighting from above has been shown');
 });
 
-test('model-viewer: without its cache, a repaint given up on still changes the shadow once shown', (t) => {
+test('model-viewer: without its cache, a repaint slow to load still changes the shadow once shown', (t) => {
     t.mock.timers.enable({ apis: ['setTimeout'] });
     const { scene, drag, show } = modelViewerHarness({ theta: 0, phi: 75 }, false,
         { dataset: { lights: rigData([30, -5]) } });
     show();
     drag(5);
     t.mock.timers.tick(250);
-    // Given up on, but model-viewer shows it later all the same
     t.mock.timers.tick(10000);
     show();
     assert.equal(scene.shadow.intensity, 0.3, 'shown with the repainted lighting');
+});
+
+test('model-viewer: without its cache, a repaint is not given up on, so two never load at once', (t) => {
+    t.mock.timers.enable({ apis: ['setTimeout'] });
+    const { scene, drag, show, viewer, revoked } = modelViewerHarness({ theta: 0, phi: 75 }, false,
+        { dataset: { lights: rigData([30, -5]) } });
+    show();
+    drag(5);
+    t.mock.timers.tick(250);
+    const slow = viewer.environmentImage;
+    t.mock.timers.tick(10000);
+    drag(-10);
+    t.mock.timers.tick(250);
+    assert.equal(viewer.environmentImage, slow, 'the next repaint waits for the slow one');
+    assert.deepEqual(revoked, []);
+
+    // The slow one is shown at last, then the one that waited
+    show();
+    assert.equal(scene.shadow.intensity, 0.3, 'shown with the lighting from above');
+    assert.deepEqual(revoked, ['blob:rig1'], 'only the environment it replaces is released');
+    show();
+    assert.equal(scene.shadow.intensity, 0, 'hidden with the lighting from below');
+    assert.deepEqual(revoked, ['blob:rig1', 'blob:rig2']);
+});
+
+test('model-viewer: without its cache, every environment replaced is released', (t) => {
+    t.mock.timers.enable({ apis: ['setTimeout'] });
+    const { drag, show, revoked, created } = modelViewerHarness({ theta: 0, phi: 75 }, false,
+        { dataset: { lights: rigData([30, -5]) } });
+    show();
+    for (let i = 0; i < 3; i++) {
+        // A slow repaint, then another before it is shown
+        drag(5 + i);
+        t.mock.timers.tick(250);
+        t.mock.timers.tick(10000);
+        drag(-5 - i);
+        t.mock.timers.tick(250);
+        show();
+        show();
+    }
+    assert.equal(created() - revoked.length, 1, 'only the environment shown is kept');
 });
 
 test('model-viewer: the rig waiting is painted even if switching the shadow throws', (t) => {
@@ -1042,7 +1131,6 @@ test('model-viewer: a light a hair above level is painted level once repainted, 
     // Brighter: repainted from the angles the controls show, in whole degrees
     listeners['threedviewer:lighting']({ detail: { mode: 'model', lights: [{ id: 'light1', strength: 2 }] } });
     t.mock.timers.tick(250);
-    t.mock.timers.tick(10000);
     show();
     assert.equal(scene.shadow.intensity, 0, 'hidden, as the light painted is level');
 });

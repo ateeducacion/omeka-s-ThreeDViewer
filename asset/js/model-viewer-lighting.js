@@ -13,16 +13,10 @@
 
   /**
    * Each viewer's rig environments: the lights painted into each Blob URL given to model-viewer and
-   * not yet released, the environment shown ({ url, lights }), the URL it is loading, and the rig to
-   * paint once that has loaded
+   * not yet released, the environment shown ({ url, lights }), the URL it is loading, the rig to
+   * paint once that has loaded, and model-viewer's scene, from getScene()
    */
   const environments = new WeakMap();
-
-  /**
-   * How long to wait for an environment where model-viewer's cache cannot be reached, so that there
-   * is no telling whether it has started loading or failed, before painting the next
-   */
-  const ENVIRONMENT_TIMEOUT = 10000;
 
   /** How often to look for model-viewer starting to load an environment */
   const ENVIRONMENT_POLL = 250;
@@ -215,10 +209,10 @@
    * the default view looks from.
    *
    * One environment loads at a time: a rig painted meanwhile waits for it, and replaces any rig
-   * already waiting. Each environment is released once the next is shown, and state.onShown() is
-   * then called, if set.
+   * already waiting. So the environment model-viewer shows is always the one last given it. Each
+   * environment is released once the next is shown, and state.onShown() is then called, if set.
    *
-   * The lights painted, { strength, direction }, are kept with the environment's URL as they are at
+   * The lights painted, as rigLights() gives them, are kept with the environment's URL as they are at
    * painting, taken from the same angles as the image: the controller changes its lights in place.
    * Until model-viewer shows an environment, the first rig painted counts as shown.
    */
@@ -229,9 +223,6 @@
       state = { painted: new Map(), shown: null, loading: null, timer: 0, waiting: null };
       environments.set(viewer, state);
       viewer.addEventListener('environment-change', function () {
-        // The environment model-viewer shows is the one last given it, whichever it was loading.
-        // ponytail: without its cache, an environment given up on that loads after the next is
-        // credited with the next's lights; reading model-viewer's current map would tell them apart
         const url = String(viewer.environmentImage).replace(/#\.hdr$/, '');
         if (state.painted.has(url)) {
           loaded(viewer, state, url, true);
@@ -245,9 +236,7 @@
 
     const hdr = lighting.rgbe(lighting.environment(rig, back));
     const url = URL.createObjectURL(new Blob([hdr], { type: 'image/vnd.radiance' }));
-    const lights = rig.lights.map(function (light) {
-      return { strength: light.strength, direction: lighting.direction(light.azimuth, light.elevation, back, false) };
-    });
+    const lights = rigLights(rig, back);
     state.painted.set(url, lights);
     if (!state.shown) {
       state.shown = { url: null, lights: lights };
@@ -263,20 +252,14 @@
    * an environment only once the element is on screen, which may be long after it is given one,
    * so wait for it to start, however long that takes, rather than give up on it and free an image
    * it has yet to load.
+   *
+   * ponytail: without model-viewer's cache a failure cannot be seen, so the environment is waited
+   * for until shown: one that fails holds back the rigs painted after it until the page reloads.
+   * Giving up on it would let two load at once, with no telling which one model-viewer then shows.
    */
   function watch(viewer, state, url) {
-    if (state.loading !== url) {
-      return;
-    }
     const cache = environmentCache(viewer);
-    if (!cache) {
-      // Stop waiting for it, but keep its URL, which model-viewer may yet load
-      state.timer = setTimeout(function () {
-        if (state.loading === url) {
-          state.loading = null;
-          next(viewer, state);
-        }
-      }, ENVIRONMENT_TIMEOUT);
+    if (state.loading !== url || !cache) {
       return;
     }
     const loading = cache.get(url + '#.hdr');
@@ -286,33 +269,39 @@
       }, ENVIRONMENT_POLL);
       return;
     }
-    // Loading: it is either shown (environment-change) or fails
+    // Loading: it is either shown (environment-change) or fails, and model-viewer, once its own
+    // promises have settled, may then clear its environment
     Promise.resolve(loading).then(null, function () {
-      if (state.loading === url) {
-        loaded(viewer, state, url, false);
-      }
+      setTimeout(function () {
+        if (state.loading === url) {
+          loaded(viewer, state, url, false);
+        }
+      }, 0);
     });
   }
 
   /**
-   * An environment is shown (or the one loading has failed, and model-viewer then shows none):
-   * release the one it replaces (and the one that failed), then paint the rig waiting, if any.
+   * An environment is shown, or the one loading has failed: release the one shown before it and the
+   * one that failed, then paint the rig waiting, if any. A failed load leaves the environment shown
+   * as it was, unless model-viewer has cleared its scene's environment (with an Error it does); with
+   * no scene to tell, that environment is kept, as it may still be shown.
    */
   function loaded(viewer, state, url, shown) {
     if (state.loading === url) {
       clearTimeout(state.timer);
       state.loading = null;
     }
-    const old = state.shown.url;
-    if (old !== url) {
+    const freed = shown ? [] : [url];
+    if (shown ? state.shown.url !== url : state.scene && state.scene.environment === null) {
+      freed.push(state.shown.url);
       state.shown = { url: shown ? url : null, lights: shown ? state.painted.get(url) : [] };
-      [old, shown ? null : url].forEach(function (freed) {
-        if (freed) {
-          state.painted.delete(freed);
-          release(viewer, freed);
-        }
-      });
     }
+    freed.forEach(function (old) {
+      if (old) {
+        state.painted.delete(old);
+        release(viewer, old);
+      }
+    });
     try {
       if (state.onShown) {
         state.onShown();
@@ -580,8 +569,11 @@
       // Decided for the default view before the model loads, so no frame shows a shadow to be hidden
       const scene = getScene(viewer);
       const shadow = shadowSwitch(scene);
-      if (shadow && rig) {
-        shadow(viewerShadowShown(viewer, environments.get(viewer).shown.lights));
+      if (rig) {
+        environments.get(viewer).scene = scene;
+        if (shadow) {
+          shadow(viewerShadowShown(viewer, environments.get(viewer).shown.lights));
+        }
       }
       if (viewer.loaded) {
         setUpLighting(viewer, rig, side, shadow, scene);
