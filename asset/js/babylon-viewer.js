@@ -314,10 +314,6 @@
     }
 
     function createEnvironment(scene, option) {
-        if (option === 'studio') {
-            return scene.createDefaultEnvironment({ enableGroundShadow: true, createSkybox: true });
-        }
-
         if (option === 'default') {
             return scene.createDefaultEnvironment();
         }

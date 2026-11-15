@@ -55,14 +55,14 @@ class ConfigFormTest extends TestCase
         );
     }
 
-    public function testBabylonEnvironmentsPromiseNoShadowTheyDoNotDraw(): void
+    public function testBabylonEnvironmentsOfferNoDuplicateStudio(): void
     {
         $this->form->init();
 
-        // No light casts a shadow in Babylon.js, so "studio" only differs by its ground (#57).
+        // "Studio with ground shadow" drew the same scene as the default environment (#57)
         $this->assertSame(
-            ['none' => 'None', 'default' => 'Default environment', 'studio' => 'Studio'],
-            $this->form->get('threedviewer_babylon_environment')->getValueOptions()
+            ['none', 'default'],
+            array_keys($this->form->get('threedviewer_babylon_environment')->getValueOptions())
         );
     }
 
