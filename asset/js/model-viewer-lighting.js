@@ -27,11 +27,14 @@
   const ENVIRONMENT_POLL = 250;
 
   /**
-   * The height, as the y of its up axis, below which model-viewer's own environment no longer lights
-   * the model from above: -45 degrees, past the side panels of its neutral room, 30-45 degrees up,
-   * which give it most of its light
+   * The height of its up axis over which model-viewer's own environment lights the model from above:
+   * -74 degrees. In the bundled model-viewer, the neutral room sits 3.5 below the model, so its side
+   * panels' centres are 16-39 degrees up (the lowest, at [7, 8, -14], 16.04); tilted any way, every
+   * panel is at or below level only once the up axis is 90 - 16.04 = 73.96 degrees below level.
+   * Calibrated on the neutral room, and used the same for legacy and custom images.
+   * Less 1e-6, so that -74 itself, rounded, still counts as above.
    */
-  const ENVIRONMENT_SHADOW_HEIGHT = Math.sin(-45 * Math.PI / 180);
+  const ENVIRONMENT_ABOVE = Math.sin(-74 * Math.PI / 180) - 1e-6;
 
   /**
    * A switch for model-viewer's shadow under the model, which it draws whatever the lights: called
@@ -97,10 +100,11 @@
    * Whether the shadow should show for these lights, as lighting-rig.js's shadowShown() decides: with
    * no exposure, no light shines.
    *
-   * @param {Function} [height] - As for shadowShown()
+   * @param {Function} [height] - As for shadowShown(): the y of a direction in the scene
+   * @param {number} [above] - As for shadowShown()
    */
-  function viewerShadowShown(viewer, lights, height) {
-    return viewer.exposure <= 0 || window.ThreeDViewerLighting.shadowShown(lights, height);
+  function viewerShadowShown(viewer, lights, height, above) {
+    return viewer.exposure <= 0 || window.ThreeDViewerLighting.shadowShown(lights, height, above);
   }
 
   /**
@@ -317,7 +321,7 @@
    *
    * The shadow is hidden while lights shine but none, turned by the frame, from above the model (see
    * viewerShadowShown()); model-viewer's own environment, only once its up axis is below
-   * ENVIRONMENT_SHADOW_HEIGHT. The model's turn is about the vertical, so it raises or lowers no light.
+   * ENVIRONMENT_ABOVE. The model's turn is about the vertical, so it raises or lowers no light.
    * While a repaint is on its way, the shadow waits for it, to change with the lighting shown.
    *
    * @param {Object|null} rig - The rig as painted, its strengths already multiplied by brightness
@@ -357,6 +361,9 @@
       }
       lights = [environment];
     }
+
+    // Over which a light is above the model: the rig's lights at level, the environment lower
+    const above = rig ? undefined : ENVIRONMENT_ABOVE;
 
     let repaint = 0;
     let changed = false;
@@ -474,10 +481,9 @@
         changed = false;
         orient(all, frame);
         if (shadow) {
-          const show = viewerShadowShown(viewer, all, function (d) {
-            const height = frame ? heightTurned(frame, d) : d.y;
-            return rig ? height : height - ENVIRONMENT_SHADOW_HEIGHT;
-          });
+          const show = viewerShadowShown(viewer, all, frame ? function (d) {
+            return heightTurned(frame, d);
+          } : null, above);
           if (repaint || shadowWaiting !== null) {
             shadowWaiting = show;
           } else {
