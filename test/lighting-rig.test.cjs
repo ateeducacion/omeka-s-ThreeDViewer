@@ -832,7 +832,7 @@ test('model-viewer: the shadow changes once the repainted lighting is shown, not
     assert.equal(baked.visible, false);
 });
 
-test('model-viewer: at strength 0, a shadow baked into the model is hidden while every light is below', () => {
+test('model-viewer: at strength 0, a shadow baked into the model is hidden while every light is below', async () => {
     const { scene, baked, listeners } = modelViewerHarness({ theta: 0, phi: 75 }, false,
         { strength: 0, dataset: { lights: rigData([30, -30], [-60, -60]) } });
     assert.equal(scene.shadow, null, 'model-viewer makes no shadow of its own at 0');
@@ -846,6 +846,10 @@ test('model-viewer: at strength 0, a shadow baked into the model is hidden while
     listeners['threedviewer:lighting']({ detail: { mode: 'model', lights: [
         { id: 'light1', azimuth: 30, elevation: 40 }
     ] } });
+    // Once the repainted lighting is shown, after the first environment
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    listeners['environment-change']();
+    listeners['environment-change']();
     assert.equal(baked.visible, true, 'shown again with a light above');
     assert.equal(scene.shadow, null);
 });
