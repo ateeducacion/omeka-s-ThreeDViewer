@@ -12,8 +12,9 @@
   'use strict';
 
   /**
-   * Each viewer's rig environments: the Blob URL model-viewer shows and the lights painted into it,
-   * the one it is loading, and the rig to paint once that has loaded
+   * Each viewer's rig environments: the lights painted into each Blob URL given to model-viewer and
+   * not yet released, the environment shown ({ url, lights }), the URL it is loading, and the rig to
+   * paint once that has loaded
    */
   const environments = new WeakMap();
 
@@ -83,13 +84,13 @@
       }
       shown = show;
       if (show) {
-        // Which shows any baked shadow again too, once a model has any
         scene.setShadowIntensity(scene.shadowIntensity);
       } else {
         hide();
-        if (setBakedShadowVisibility) {
-          scene.setBakedShadowVisibility();
-        }
+      }
+      // The bundled model-viewer's setShadowIntensity() shows them again too, but not every version may
+      if (setBakedShadowVisibility) {
+        scene.setBakedShadowVisibility();
       }
       if (typeof scene.queueRender === 'function') {
         scene.queueRender();
@@ -217,32 +218,44 @@
    * already waiting. Each environment is released once the next is shown, and state.onShown() is
    * then called, if set.
    *
-   * @param {Object[]} lights - The rig's lights as the controller has them, { strength, direction },
-   *     kept for the shadow as they are now: the controller changes them in place
+   * The lights painted, { strength, direction }, are kept with the environment's URL as they are at
+   * painting, taken from the same angles as the image: the controller changes its lights in place.
+   * Until model-viewer shows an environment, the first rig painted counts as shown.
    */
-  function applyRig(viewer, rig, back, lights) {
+  function applyRig(viewer, rig, back) {
+    const lighting = window.ThreeDViewerLighting;
     let state = environments.get(viewer);
     if (!state) {
-      state = { shown: null, lights: null, loading: null, painted: null, timer: 0, waiting: null };
+      state = { painted: new Map(), shown: null, loading: null, timer: 0, waiting: null };
       environments.set(viewer, state);
       viewer.addEventListener('environment-change', function () {
-        loaded(viewer, state, true);
+        // The environment model-viewer shows is the one last given it, whichever it was loading.
+        // ponytail: without its cache, an environment given up on that loads after the next is
+        // credited with the next's lights; reading model-viewer's current map would tell them apart
+        const url = String(viewer.environmentImage).replace(/#\.hdr$/, '');
+        if (state.painted.has(url)) {
+          loaded(viewer, state, url, true);
+        }
       });
     }
     if (state.loading) {
-      state.waiting = { rig: rig, back: back, lights: lights };
+      state.waiting = { rig: rig, back: back };
       return;
     }
 
-    const lighting = window.ThreeDViewerLighting;
     const hdr = lighting.rgbe(lighting.environment(rig, back));
-    state.loading = URL.createObjectURL(new Blob([hdr], { type: 'image/vnd.radiance' }));
-    state.painted = lights.map(function (light) {
-      return { strength: light.strength, direction: light.direction };
+    const url = URL.createObjectURL(new Blob([hdr], { type: 'image/vnd.radiance' }));
+    const lights = rig.lights.map(function (light) {
+      return { strength: light.strength, direction: lighting.direction(light.azimuth, light.elevation, back, false) };
     });
+    state.painted.set(url, lights);
+    if (!state.shown) {
+      state.shown = { url: null, lights: lights };
+    }
+    state.loading = url;
     // model-viewer chooses its HDR loader by the URL's ending; fetch ignores the fragment
-    viewer.environmentImage = state.loading + '#.hdr';
-    watch(viewer, state, state.loading);
+    viewer.environmentImage = url + '#.hdr';
+    watch(viewer, state, url);
   }
 
   /**
@@ -276,33 +289,37 @@
     // Loading: it is either shown (environment-change) or fails
     Promise.resolve(loading).then(null, function () {
       if (state.loading === url) {
-        loaded(viewer, state, false);
+        loaded(viewer, state, url, false);
       }
     });
   }
 
   /**
-   * The environment model-viewer was loading is shown (or has failed): release the one it
-   * replaces (or itself), then paint the rig waiting, if any.
+   * An environment is shown (or the one loading has failed, and model-viewer then shows none):
+   * release the one it replaces (and the one that failed), then paint the rig waiting, if any.
    */
-  function loaded(viewer, state, shown) {
-    if (!state.loading) {
-      return;
+  function loaded(viewer, state, url, shown) {
+    if (state.loading === url) {
+      clearTimeout(state.timer);
+      state.loading = null;
     }
-    clearTimeout(state.timer);
-    const old = shown ? state.shown : state.loading;
-    if (shown) {
-      state.shown = state.loading;
-      state.lights = state.painted;
+    const old = state.shown.url;
+    if (old !== url) {
+      state.shown = { url: shown ? url : null, lights: shown ? state.painted.get(url) : [] };
+      [old, shown ? null : url].forEach(function (freed) {
+        if (freed) {
+          state.painted.delete(freed);
+          release(viewer, freed);
+        }
+      });
     }
-    state.loading = null;
-    if (old) {
-      release(viewer, old);
+    try {
+      if (state.onShown) {
+        state.onShown();
+      }
+    } finally {
+      next(viewer, state);
     }
-    if (shown && state.onShown) {
-      state.onShown();
-    }
-    next(viewer, state);
   }
 
   /** Paint the rig waiting, if any */
@@ -310,7 +327,7 @@
     const waiting = state.waiting;
     state.waiting = null;
     if (waiting) {
-      applyRig(viewer, waiting.rig, waiting.back, waiting.lights);
+      applyRig(viewer, waiting.rig, waiting.back);
     }
   }
 
@@ -339,9 +356,8 @@
    * @param {{x: number, z: number}} side - The side of the model the default view looks from
    * @param {?function(boolean)} shadow - From shadowSwitch()
    * @param {Object|null} scene - From getScene()
-   * @param {?Array} rigged - The rig's lights, from rigLights()
    */
-  function setUpLighting(viewer, rig, side, shadow, scene, rigged) {
+  function setUpLighting(viewer, rig, side, shadow, scene) {
     const lighting = window.ThreeDViewerLighting;
     // model-viewer's three.js classes, which its bundle does not export, from the scene's own objects.
     // Scene.environmentRotation was added in three.js r162.
@@ -361,7 +377,7 @@
 
     let lights;
     if (rig) {
-      lights = rigged;
+      lights = rigLights(rig, side);
       // Each repaint loads a new environment; without this, the loading bar flashes as a slider moves
       viewer.style.setProperty('--progress-bar-height', '0px');
     } else {
@@ -387,7 +403,11 @@
     const state = rig ? environments.get(viewer) : null;
     function paint() {
       repaint = 0;
-      applyRig(viewer, { ambient: latest[0], lights: latest.slice(1) }, side, latest);
+      applyRig(viewer, { ambient: latest[0], lights: latest.slice(1) }, side);
+    }
+
+    function height(d) {
+      return heightTurned(placed.frame, d);
     }
 
     /** Show the shadow or not for the lighting on screen, turned by the frame */
@@ -395,10 +415,7 @@
       if (!shadow || !placed) {
         return;
       }
-      const frame = placed.frame;
-      shadow(viewerShadowShown(viewer, state ? state.lights || rigged : placed.all, frame ? function (d) {
-        return heightTurned(frame, d);
-      } : null, above));
+      shadow(viewerShadowShown(viewer, state ? state.shown.lights : placed.all, placed.frame ? height : null, above));
     }
     if (state) {
       state.onShown = decideShadow;
@@ -554,9 +571,8 @@
       viewer.exposure = 1;
     }
     const side = viewSide(viewer);
-    const rigged = rig ? rigLights(rig, side) : null;
     if (rig) {
-      applyRig(viewer, rig, side, rigged);
+      applyRig(viewer, rig, side);
     }
 
     // A rig also needs turning with the model, as auto-rotate turns it
@@ -565,13 +581,13 @@
       const scene = getScene(viewer);
       const shadow = shadowSwitch(scene);
       if (shadow && rig) {
-        shadow(viewerShadowShown(viewer, rigged));
+        shadow(viewerShadowShown(viewer, environments.get(viewer).shown.lights));
       }
       if (viewer.loaded) {
-        setUpLighting(viewer, rig, side, shadow, scene, rigged);
+        setUpLighting(viewer, rig, side, shadow, scene);
       } else {
         viewer.addEventListener('load', function () {
-          setUpLighting(viewer, rig, side, shadow, scene, rigged);
+          setUpLighting(viewer, rig, side, shadow, scene);
         }, { once: true });
       }
     }
